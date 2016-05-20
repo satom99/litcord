@@ -30,7 +30,9 @@ function Client:__constructor (settings)
 end
 
 function Client:login (config)
-	if not config or (not config.token and not (config.email and config.password)) then return end
+	if not config or (not config.token and not (config.email and config.password)) then
+		return print('* Wrong or not specified login details.')
+	end
 	coroutine.wrap(
 		function()
 			self.socket.token = config.token or self.rest:request(

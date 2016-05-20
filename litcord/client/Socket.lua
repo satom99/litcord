@@ -107,13 +107,13 @@ function Socket:__listen () -- reading
 			end
 		else
 			print('Disconnected.')
-			timer.clearInterval(self.timer)
 			self.status = constants.socket.status.IDLE
 			if self.client.settings.auto_reconnect then
 				print('Reconnecting.')
 				self.status = constants.socket.status.RECONNECTING
 				self:__reconnect()
 			end
+			timer.clearInterval(self.timer)
 			break
 		end
 	end

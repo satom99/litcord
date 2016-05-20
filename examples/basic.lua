@@ -20,8 +20,9 @@ client:on(
 
 client:login(
 	{
-		token = '',
 		--[[
+		token = '',
+		-- or --
 		email = '',
 		password = '',
 		]]

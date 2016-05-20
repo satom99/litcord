@@ -4,4 +4,5 @@ return
 	rest = require('./rest'),
 	socket = require('./socket'),
 	events = require('./events'),
+	permissions = require('./permissions'),
 }

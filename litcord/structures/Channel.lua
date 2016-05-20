@@ -1,8 +1,6 @@
 local classes = require('../classes')
 local base = require('./base')
 
-local constants = require('../constants')
-
 local Invite = require('./Invite')
 local Message = require('./Message')
 local VoiceConnection = require('./VoiceConnection')
@@ -15,6 +13,12 @@ end
 
 function Channel:__onUpdate ()
 	self.isVoice = (not self.topic and not self.last_message_id)
+end
+
+function Channel:sendFile (file, content, options)
+	options = options or {}
+	options.file = file
+	return self:sendMessage(content, options)
 end
 
 function Channel:sendMessage (content, options)
@@ -52,6 +56,42 @@ function Channel:getInvites()
 	return self.invites
 end
 
+function Channel:delete ()
+	self.parent.parent.rest:request(
+		{
+			method = 'DELETE',
+			path = 'channels/'..self.id,
+		}
+	)
+end
+
+function Channel:modify (config)
+	self.parent.parent.rest:request(
+		{
+			method = 'PATCH',
+			path = 'channels/'..self.id,
+			data = { -- config, -- gives a bad request error, so no config directly..
+				name = config.name or self.name,
+				position = config.position or self.position,
+				topic = config.topic or self.topic,
+				bitrate = config.bitrate or self.bitrate,
+			},
+		}
+	)
+end
+function Channel:setName (name)
+	self:modify({name = name})
+end
+function Channel:setPosition (position)
+	self:modify({position = position})
+end
+function Channel:setTopic (topic)
+	self:modify({topic = topic})
+end
+function Channel:setBitrate (bitrate)
+	self:modify({bitrate = bitrate})
+end
+
 -- Voice
 function Channel:join ()
 	if not self.isVoice or self.voiceConnection then return end
@@ -60,7 +100,6 @@ end
 
 function Channel:leave ()
 	if not self.isVoice or not self.voiceConnection then return end
-	print('leave')
 	self.voiceConnection:disconnect()
 end
 

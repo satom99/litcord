@@ -48,6 +48,11 @@ function Socket:send (opcode, data)
 	)()
 end
 
+function Socket:disconnect()
+	self.__manualDisconnect = true
+	self.__write()
+end
+
 function Socket:connect ()
 	if self.status == constants.socket.status.CONNECTED then return end
 	if not self.gateway then
@@ -109,13 +114,15 @@ function Socket:__listen () -- reading
 					end
 				else
 					print('Disconnected.')
+					self.timer:stop()
+					self.timer:close()
 					self.status = constants.socket.status.IDLE
-					if self.client.settings.auto_reconnect then
+					if not self.__manualDisconnect and self.client.settings.auto_reconnect then
 						print('Reconnecting.')
 						self.status = constants.socket.status.RECONNECTING
 						self:__reconnect()
 					end
-					timer.clearInterval(self.timer)
+					self.__manualDisconnect = false
 					break
 				end
 			end

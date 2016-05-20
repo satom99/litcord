@@ -6,7 +6,7 @@ local base = require('../constants/rest')
 local class = require('../classes/new')
 local package = require('../package')
 
-function Error (code, message)
+local function Error (code, message)
 	print('* Unhandled REST error: '..code..' - '..message)
 end
 

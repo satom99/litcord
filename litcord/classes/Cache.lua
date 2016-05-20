@@ -26,6 +26,9 @@ function Cache:getAll (key, value, all)
 end
 
 function Cache:remove (object)
+	if type(object) ~= 'table' then
+		object = {[self.discriminator] = object}
+	end
 	for i,v in ipairs(self.__data) do
 		if tostring(v[self.discriminator]) == tostring(object[self.discriminator]) then
 			table.remove(self.__data, i)

@@ -98,6 +98,9 @@ function VoiceConnection:__listen () -- reading
 		function()
 			while true do
 				if not self.__read then break end
+				if type(self.__read) == 'string' then
+					print(self.__read)
+				end
 				local read = self.__read()
 				if read and read.payload then
 					local data = json.decode(read.payload)

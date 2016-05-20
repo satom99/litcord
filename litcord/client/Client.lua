@@ -178,6 +178,8 @@ function Client:__initHandlers ()
 				local server = self.servers:get('id', data.guild_id)
 				if not server then return end -- should exist
 				--
+				local permission_overwrites = data.permission_overwrites
+				data.permission_overwrites = nil
 				data.guild_id = nil
 				local channel = server.channels:get('id', data.id)
 				if not channel then
@@ -186,6 +188,15 @@ function Client:__initHandlers ()
 					self.__channels:add(channel)
 				end
 				channel:update(data)
+				--
+				if not channel.permission_overwrites then
+					channel.permission_overwrites = classes.Cache()
+					for _,v in ipairs(permission_overwrites) do
+						local overwrite = structures.Overwrite(channel)
+						overwrite:update(v)
+						channel.permission_overwrites:add(overwrite)
+					end
+				end
 			end
 		end
 	)
@@ -328,9 +339,10 @@ function Client:__initHandlers ()
 			if not server then return end
 			local role = server.roles:get('id', data.role.id)
 			if not role then
-				role = structures.Role(self)
+				role = structures.Role(server)
 				server.roles:add(role)
 			end
+			data.role.permissions = structures.Permissions(role, data.role.permissions)
 			role:update(data.role)
 			server.roles:add(role)
 		end
@@ -340,7 +352,7 @@ function Client:__initHandlers ()
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
 			if not server then return end
-			server.roles:remove(data.role)
+			server.roles:remove(data.role_id)
 		end
 	)
 	-- Guild bans

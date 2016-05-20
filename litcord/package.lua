@@ -23,7 +23,7 @@ return
 	dependencies = {
 		'luvit/json@2.5.2',
 		'luvit/timer@2.0.0',
-		'luvit/secure-socket@1.1.2',
+		'luvit/secure-socket@1.1.3',
 		'creationix/coro-http@2.1.1',
 		'creationix/coro-websocket@1.0.0-1',
 	},

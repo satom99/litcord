@@ -2,6 +2,7 @@ local classes = require('../classes')
 local base = require('./base')
 
 local User = require('./User')
+local Role = require('./Role')
 local Invite = require('./Invite')
 
 local Server = classes.new(base)
@@ -142,6 +143,21 @@ function Server:fetchBans ()
 		end
 		user:update(data)
 		self.bans:add(user)
+	end
+end
+
+function Server:createRole (config)
+	local data = self.parent.rest:request(
+		{
+			method = 'POST',
+			path = 'guilds/'..self.id..'/roles',
+		}
+	)
+	local role = Role(self)
+	self.roles:add(role)
+	role:update(data)
+	if config then
+		role:edit(config)
 	end
 end
 

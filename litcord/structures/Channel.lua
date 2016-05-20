@@ -1,8 +1,11 @@
 local classes = require('../classes')
 local base = require('./base')
 
+local constants = require('../constants')
+
 local Invite = require('./Invite')
 local Message = require('./Message')
+local VoiceConnection = require('./VoiceConnection')
 
 local Channel = classes.new(base)
 
@@ -47,6 +50,18 @@ function Channel:getInvites()
 		end
 	end
 	return self.invites
+end
+
+-- Voice
+function Channel:join ()
+	if not self.isVoice or self.voiceConnection then return end
+	self.voiceConnection = VoiceConnection(self)
+end
+
+function Channel:leave ()
+	if not self.isVoice or not self.voiceConnection then return end
+	print('leave')
+	self.voiceConnection:disconnect()
 end
 
 return Channel

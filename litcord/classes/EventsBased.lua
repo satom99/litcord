@@ -5,8 +5,8 @@ local EventsBased = class()
 function EventsBased:__constructor ()
 	self.__eventHandlers = {}
 end
-function EventsBased:once (name, callback)
-	self.on(name, callback, true)
+function EventsBased:once (events, callback)
+	self:on(events, callback, true)
 end
 function EventsBased:on (events, callback, once)
 	if type(events) == 'string' then
@@ -24,9 +24,14 @@ function EventsBased:on (events, callback, once)
 	end
 end
 function EventsBased:dispatchEvent (name, data)
-	for _,v in ipairs(self.__eventHandlers) do
+	local removed = 0
+	for i,v in ipairs(self.__eventHandlers) do
 		if v.name == name:lower() then
 			v.callback(data)
+			if v.once then
+				table.remove(self.__eventHandlers, i)
+				removed = removed + 1
+			end
 		end
 	end
 end

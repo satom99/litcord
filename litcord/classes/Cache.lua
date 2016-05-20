@@ -9,7 +9,7 @@ end
 
 function Cache:get (key, value)
 	for _,v in ipairs(self.__data) do
-		if v[key] == value then
+		if tostring(v[key]) == tostring(value) then
 			return v
 		end
 	end
@@ -18,7 +18,7 @@ end
 function Cache:getAll (key, value, all)
 	local cache = {}
 	for _,v in ipairs(self.__data) do
-		if v[key] == value then
+		if tostring(v[key]) == tostring(value) then
 			table.insert(cache, v)
 		end
 	end
@@ -27,7 +27,7 @@ end
 
 function Cache:remove (object)
 	for i,v in ipairs(self.__data) do
-		if v[self.discriminator] == object[self.discriminator] then
+		if tostring(v[self.discriminator]) == tostring(object[self.discriminator]) then
 			table.remove(self.__data, i)
 			v = nil
 			break
@@ -44,7 +44,7 @@ end
 
 function Cache:update (new)
 	for _,v in ipairs(self.__data) do
-		if v[self.discriminator] == new[self.discriminator] then
+		if tostring(v[self.discriminator]) == tostring(new[self.discriminator]) then
 			v = new
 			break
 		end

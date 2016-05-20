@@ -96,27 +96,31 @@ end
 
 function Socket:__listen () -- reading
 	print('Listening.')
-	while true do
-		if not self.__read then break end
-		local read = self.__read()
-		if read and read.payload then
-			local data = json.decode(read.payload)
-			if data.op == constants.socket.OPcodes.DISPATCH then
-				self.sequence = data.s
-				self.client:dispatchEvent(data.t, data.d)
+	coroutine.wrap(
+		function()
+			while true do
+				if not self.__read then break end
+				local read = self.__read()
+				if read and read.payload then
+					local data = json.decode(read.payload)
+					if data.op == constants.socket.OPcodes.DISPATCH then
+						self.sequence = data.s
+						self.client:dispatchEvent(data.t, data.d)
+					end
+				else
+					print('Disconnected.')
+					self.status = constants.socket.status.IDLE
+					if self.client.settings.auto_reconnect then
+						print('Reconnecting.')
+						self.status = constants.socket.status.RECONNECTING
+						self:__reconnect()
+					end
+					timer.clearInterval(self.timer)
+					break
+				end
 			end
-		else
-			print('Disconnected.')
-			self.status = constants.socket.status.IDLE
-			if self.client.settings.auto_reconnect then
-				print('Reconnecting.')
-				self.status = constants.socket.status.RECONNECTING
-				self:__reconnect()
-			end
-			timer.clearInterval(self.timer)
-			break
 		end
-	end
+	)()
 end
 
 return Socket

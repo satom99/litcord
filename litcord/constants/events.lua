@@ -26,4 +26,8 @@ return
 	CHANNEL_CREATE = 'channel_create',
 	CHANNEL_UPDATE = 'channel_update',
 	CHANNEL_DELETE = 'channel_delete',
+	
+	-- Voice
+	VOICE_STATE_UPDATE = 'voice_state_update',
+	VOICE_SERVER_UPDATE = 'voice_server_update',
 }

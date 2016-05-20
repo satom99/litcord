@@ -4,6 +4,7 @@ return
 
 	Channel = require('./Channel'),
 	Message = require('./Message'),
+	VoiceConnection = require('./VoiceConnection'),
 
 	Server = require('./Server'),
 	Role = require('./Role'),

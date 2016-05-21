@@ -375,7 +375,7 @@ function Client:__initHandlers ()
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
 			if not server then return end
-			local ban = server.bans:get('id', user.id)
+			local ban = server.bans:get('id', data.id)
 			if not ban then return end
 			server.bans:remove(ban)
 		end

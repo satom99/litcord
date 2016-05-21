@@ -23,6 +23,14 @@ function Message:__onUpdate ()
 		end
 		user:update(v)
 		v = user
+		--
+		local mentioned
+		for _,v in ipairs(self.mentions) do -- looping again because this is fired on both message creation and update
+			if v.id == self.parent.parent.parent.user.id then
+				mentioned = true
+			end
+		end
+		self.client_mentioned = mentioned
 	end
 	for mention in self.content:gmatch('<#.->') do -- channel mentions
 		local id = mention:sub(3, #mention-1)

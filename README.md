@@ -1,4 +1,4 @@
-# litcord - 0.0.3a
+# litcord - 0.0.5a
 
 Welcome to litcord's repository. This is an early version and thus is not functional nor meant for distribution yet. Anything you see may be subject to change.
 

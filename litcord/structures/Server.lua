@@ -8,6 +8,7 @@ local Invite = require('./Invite')
 local Server = classes.new(base)
 
 function Server:__constructor ()
+	self.bans = classes.Cache()
 	self.roles = classes.Cache()
 	self.members = classes.Cache()
 	self.channels = classes.Cache()

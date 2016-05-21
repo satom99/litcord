@@ -12,9 +12,14 @@ end
 
 function Message:__onUpdate ()
 	self.cleanContent = self.content
+	local mentioned
 	for _,v in ipairs(self.mentions) do
 		self.cleanContent = self.cleanContent:gsub('<@'..v.id..'>', '@'..v.username)
 		self.cleanContent = self.cleanContent:gsub('<@!'..v.id..'>', '@!'..v.username)
+		--
+		if v.id == self.parent.parent.parent.user.id then
+			mentioned = true
+		end
 		--
 		local user = self.parent.parent.parent.users:get('id', v.id)
 		if not user then
@@ -23,15 +28,8 @@ function Message:__onUpdate ()
 		end
 		user:update(v)
 		v = user
-		--
-		local mentioned
-		for _,v in ipairs(self.mentions) do -- looping again because this is fired on both message creation and update
-			if v.id == self.parent.parent.parent.user.id then
-				mentioned = true
-			end
-		end
-		self.client_mentioned = mentioned
 	end
+	self.client_mentioned = mentioned
 	for mention in self.content:gmatch('<#.->') do -- channel mentions
 		local id = mention:sub(3, #mention-1)
 		local channel = self.parent.parent.channels:get('id', id)

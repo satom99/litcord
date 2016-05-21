@@ -11,6 +11,7 @@ function Server:__constructor ()
 	self.roles = classes.Cache()
 	self.members = classes.Cache()
 	self.channels = classes.Cache()
+	self.invites = classes.Cache()
 end
 
 function Server:__onUpdate ()
@@ -109,8 +110,8 @@ function Server:createVoiceChannel (name, bitrate)
 end
 
 function Server:getInvites ()
-	if not self.invites then
-		self.invites = classes.Cache()
+	if not self.__retrievedInvites then
+		self.__retrievedInvites = true
 		local invites = self.parent.rest:request(
 			{
 				method = 'GET',

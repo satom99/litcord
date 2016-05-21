@@ -8,6 +8,7 @@ local VoiceConnection = require('./VoiceConnection')
 local Channel = classes.new(base)
 
 function Channel:__constructor ()
+	self.invites = classes.Cache()
 	self.history = classes.Cache()
 end
 
@@ -37,9 +38,23 @@ function Channel:sendMessage (content, options)
 	return message
 end
 
+function Channel:createInvite (config)
+	local data = self.parent.parent.rest:request(
+		{
+			method = 'POST',
+			path = 'channels/'..self.id..'/invites',
+			data = config,
+		}
+	)
+	local invite = Invite(self)
+	invite:update(data)
+	self.invites:add(invite)
+	return invite
+end
+
 function Channel:getInvites()
-	if not self.invites then
-		self.invites = classes.Cache()
+	if not self.__retrievedInvites then
+		self.__retrievedInvites = true
 		local invites = self.parent.rest:request(
 			{
 				method = 'GET',

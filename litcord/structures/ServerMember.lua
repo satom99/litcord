@@ -6,9 +6,9 @@ local ServerMember = classes.new(base)
 function ServerMember:__onUpdate () -- parent = server / server.parent = client |=> .parent.parent equals to client
 	self.id = self.user.id
 	self.user = self.parent.parent.users:get('id', self.user.id)
-	for i,v in ipairs(self.roles) do
+	for _,v in ipairs(self.roles) do
 		local role = self.parent.roles:get('id', v)
-		table.insert(self.roles, i, role) --// v = role
+		v = role
 	end
 end
 

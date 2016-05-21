@@ -1,6 +1,8 @@
 local class = require('../classes/new')
 local base = require('./base')
 
+local User = require('./User')
+
 local Message = class(base) -- parent = channel / channel.parent = user/server / x.parent = client |=> .parent.parent.parent equals to client
 
 function Message:__constructor (_, author)
@@ -13,6 +15,14 @@ function Message:__onUpdate ()
 	for _,v in ipairs(self.mentions) do
 		self.cleanContent = self.cleanContent:gsub('<@'..v.id..'>', '@'..v.username)
 		self.cleanContent = self.cleanContent:gsub('<@!'..v.id..'>', '@!'..v.username)
+		--
+		local user = self.parent.parent.parent.users:get('id', v.id)
+		if not user then
+			user = User(self.parent.parent.parent)
+			self.parent.parent.parent.users:add(user)
+		end
+		user:update(v)
+		v = user
 	end
 	for mention in self.content:gmatch('<#.->') do -- channel mentions
 		local id = mention:sub(3, #mention-1)

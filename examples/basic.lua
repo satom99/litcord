@@ -12,9 +12,21 @@ client:on(
 	'message',
 	function(message)
 		print(message.author.username..': '..message.cleanContent)
-		if message.author.id == 0 then -- change this with your id
-			message:reply('interesting..')
+	end
+)
+
+client:on(
+	'message',
+	function(message)
+		if message.author.id == client.user.id then return end
+		local mentioned
+		for _,v in ipairs(message.mentions) do
+			if v.id == client.user.id then
+				mentioned = true
+			end
 		end
+		if not mentioned then return end
+		message:reply('interesting..')
 	end
 )
 

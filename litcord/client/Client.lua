@@ -178,7 +178,7 @@ function Client:__initHandlers ()
 				local server = self.servers:get('id', data.guild_id)
 				if not server then return end -- should exist
 				--
-				local permission_overwrites = data.permission_overwrites
+				local permission_overwrites = data.permission_overwrites or {}
 				data.permission_overwrites = nil
 				data.guild_id = nil
 				local channel = server.channels:get('id', data.id)
@@ -262,9 +262,9 @@ function Client:__initHandlers ()
 			constants.events.GUILD_UPDATE,
 		},
 		function(data)
-			local roles = data.roles
-			local members = data.members
-			local channels = data.channels
+			local roles = data.roles or {}
+			local members = data.members or {}
+			local channels = data.channels or {}
 			data.roles = nil
 			data.members = nil
 			data.channels = nil

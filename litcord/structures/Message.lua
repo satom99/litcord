@@ -9,7 +9,23 @@ function Message:__constructor (_, author)
 end
 
 function Message:__onUpdate ()
-	self.cleanContent = self.content -- TODO
+	self.cleanContent = self.content
+	for _,v in ipairs(self.mentions) do
+		self.cleanContent = self.cleanContent:gsub('<@'..v.id..'>', '@'..v.username)
+		self.cleanContent = self.cleanContent:gsub('<@!'..v.id..'>', '@!'..v.username)
+	end
+	for mention in self.content:gmatch('<#.->') do -- channel mentions
+		local id = mention:sub(3, #mention-1)
+		local channel = self.parent.parent.channels:get('id', id)
+		local name = (channel and channel.name) or id
+		self.cleanContent = self.cleanContent:gsub(mention, '#'..name)
+	end
+	for mention in self.content:gmatch('<@&.->') do -- role mentions
+		local id = mention:sub(4, #mention-1)
+		local role = self.parent.parent.roles:get('id', id)
+		local name = (role and role.name) or id
+		self.cleanContent = self.cleanContent:gsub(mention, '@'..name)
+	end
 end
 
 function Message:reply (content)

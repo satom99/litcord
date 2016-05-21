@@ -8,7 +8,6 @@ local Invite = require('./Invite')
 local Server = classes.new(base)
 
 function Server:__constructor ()
-	self.bans = classes.Cache()
 	self.roles = classes.Cache()
 	self.members = classes.Cache()
 	self.channels = classes.Cache()
@@ -128,22 +127,25 @@ function Server:getInvites ()
 	return self.invites
 end
 
-function Server:fetchBans ()
-	local bans = self.parent.rest:request(
-		{
-			method = 'GET',
-			path = 'guilds/'..self.id..'/bans',
-		}
-	)
-	for _,v in ipairs(bans) do
-		local user = self.parent.users:get('id', data.id)
-		if not user then
-			user = User(self)
-			self.parent.users:add(user)
+function Server:getBans ()
+	if not self.bans then
+		local bans = self.parent.rest:request(
+			{
+				method = 'GET',
+				path = 'guilds/'..self.id..'/bans',
+			}
+		)
+		for _,v in ipairs(bans) do
+			local user = self.parent.users:get('id', data.id)
+			if not user then
+				user = User(self)
+				self.parent.users:add(user)
+			end
+			user:update(data)
+			self.bans:add(user)
 		end
-		user:update(data)
-		self.bans:add(user)
 	end
+	return self.bans
 end
 
 function Server:createRole (config)
@@ -159,6 +161,7 @@ function Server:createRole (config)
 	if config then
 		role:edit(config)
 	end
+	return role
 end
 
 return Server

@@ -114,8 +114,10 @@ function Socket:__listen () -- reading
 					end
 				else
 					print('Disconnected.')
-					self.timer:stop()
-					self.timer:close()
+					if self.timer then
+						self.timer:stop()
+						self.timer:close()
+					end
 					self.status = constants.socket.status.IDLE
 					if not self.__manualDisconnect and self.client.settings.auto_reconnect then
 						print('Reconnecting.')

@@ -27,7 +27,11 @@ function EventsBased:dispatchEvent (name, data)
 	local removed = 0
 	for i,v in ipairs(self.__eventHandlers) do
 		if v.name == name:lower() then
-			v.callback(data)
+			coroutine.wrap( -- callback may have rest requests so adding this prevents main thread from freezing
+				function()
+					v.callback(data)
+				end
+			)()
 			if v.once then
 				table.remove(self.__eventHandlers, i)
 				removed = removed + 1

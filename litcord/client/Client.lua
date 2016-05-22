@@ -115,6 +115,7 @@ function Client:createServer (name, region, icon)
 			},
 		}
 	)
+	if not guild then return end
 	local server = structures.Server(self)
 	self.servers:add(server)
 	server:update(guild)

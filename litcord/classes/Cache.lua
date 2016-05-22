@@ -4,12 +4,13 @@ local Cache = class()
 
 function Cache:__constructor (discriminator)
 	self.discriminator = discriminator or 'id'
+	self.__typeComparsion = tonumber
 	self.__data = {}
 end
 
 function Cache:get (key, value)
 	for _,v in ipairs(self.__data) do
-		if tostring(v[key]) == tostring(value) then
+		if self.__typeComparsion(v[key]) == self.__typeComparsion(value) then
 			return v
 		end
 	end
@@ -18,7 +19,7 @@ end
 function Cache:getAll (key, value, all)
 	local cache = {}
 	for _,v in ipairs(self.__data) do
-		if tostring(v[key]) == tostring(value) then
+		if self.__typeComparsion(v[key]) == self.__typeComparsion(value) then
 			table.insert(cache, v)
 		end
 	end
@@ -30,7 +31,7 @@ function Cache:remove (object)
 		object = {[self.discriminator] = object}
 	end
 	for i,v in ipairs(self.__data) do
-		if tostring(v[self.discriminator]) == tostring(object[self.discriminator]) then
+		if self.__typeComparsion(v[self.discriminator]) == self.__typeComparsion(object[self.discriminator]) then
 			table.remove(self.__data, i)
 			v = nil
 			break
@@ -47,7 +48,7 @@ end
 
 function Cache:update (new)
 	for _,v in ipairs(self.__data) do
-		if tostring(v[self.discriminator]) == tostring(new[self.discriminator]) then
+		if self.__typeComparsion(v[self.discriminator]) == self.__typeComparsion(new[self.discriminator]) then
 			v = new
 			break
 		end

@@ -32,6 +32,7 @@ function Channel:sendMessage (content, options)
 			data = options,
 		}
 	)
+	if not data then return end
 	local message = Message(self, self.parent.parent.user)
 	self.history:add(message)
 	message:update(data)
@@ -90,6 +91,7 @@ function Channel:modify (config)
 				position = config.position or self.position,
 				topic = config.topic or self.topic,
 				bitrate = config.bitrate or self.bitrate,
+				user_limit = config.user_limit or self.user_limit,
 			},
 		}
 	)
@@ -105,6 +107,9 @@ function Channel:setTopic (topic)
 end
 function Channel:setBitrate (bitrate)
 	self:modify({bitrate = bitrate})
+end
+function Channel:setSlots (slots)
+	self:modify({user_limit = slots})
 end
 
 -- Voice

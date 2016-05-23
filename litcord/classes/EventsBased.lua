@@ -26,7 +26,7 @@ end
 function EventsBased:dispatchEvent (name, data)
 	local removed = 0
 	for i = 1, #self.__eventHandlers do
-		i = i + removed
+		i = i - removed
 		local v = self.__eventHandlers[i]
 		if v.name == name:lower() then
 			coroutine.wrap( -- callback may have rest requests so adding this prevents main thread from freezing

@@ -207,7 +207,6 @@ function Client:__initHandlers ()
 			if data.is_private then
 				local recipient = self.users:get('id', data.recipient.id)
 				if not recipient then return end
-				recipient.channel = nil
 				self.__channels:remove(recipient.channel)
 			else
 				local server = self.servers:get('id', data.guild_id)

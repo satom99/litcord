@@ -25,7 +25,9 @@ function EventsBased:on (events, callback, once)
 end
 function EventsBased:dispatchEvent (name, data)
 	local removed = 0
-	for i,v in ipairs(self.__eventHandlers) do
+	for i = 1, #self.__eventHandlers do
+		i = i + removed
+		local v = self.__eventHandlers[i]
 		if v.name == name:lower() then
 			coroutine.wrap( -- callback may have rest requests so adding this prevents main thread from freezing
 				function()

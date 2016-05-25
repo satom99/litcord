@@ -78,7 +78,7 @@ function Client:setGame (game)
 	self:setStats({game = game})
 end
 function Client:setName (name)
-	self:setStats({name = name})
+	self:setStats({username = name})
 end
 function Client:setAvatar (avatar)
 	self:setStats({avatar = avatar})

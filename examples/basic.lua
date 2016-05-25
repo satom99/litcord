@@ -5,6 +5,7 @@ client:on(
 	'ready',
 	function()
 		print('Ready!')
+		client:setGame('litcord!')
 	end
 )
 
@@ -21,6 +22,8 @@ client:on(
 		if message.author.id == client.user.id then return end
 		if not message.client_mentioned then return end
 		message:reply('interesting..')
+		-- or
+		-- message.channel:sendMessage('interesting..')
 	end
 )
 
@@ -28,7 +31,7 @@ client:login(
 	{
 		--[[
 		token = '',
-		-- or --
+		-- or both
 		email = '',
 		password = '',
 		]]

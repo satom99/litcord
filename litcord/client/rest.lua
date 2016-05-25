@@ -59,7 +59,7 @@ function rest:request (config)
 			timer.sleep(250)
 			return self:request(config)
 		end
-		return Error(response.code, response.reason)
+		return Error(response.code, response.reason..' ('..config.path..')')
 	end
 	return json.decode(received)
 end

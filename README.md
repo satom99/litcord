@@ -1,6 +1,6 @@
 # litcord - 0.0.5
 
-Welcome to litcord's repository, a Lua wrapper for Discord's official API. Being asynchronous and mainly object-oriented makes it really easy to use. Join other litcord developers on the [Discord API server](https://discord.gg/0SBTUU1wZTY33MTU)!
+Welcome to litcord's repository, a Lua wrapper for Discord's official API. Being asynchronous and mainly object-oriented makes it really easy to use. Join other litcord developers on the [Discord API server](https://discord.gg/0SBTUU1wZTYEf3Hy)!
 
 Works with [Luvit](https://github.com/luvit/luvit), which, roughly speaking, is *a node.js style API* for Lua.
 

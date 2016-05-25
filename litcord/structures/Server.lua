@@ -67,7 +67,6 @@ function Server:delete ()
 			path = 'guilds/'..self.id,
 		}
 	)
-	self.parent.servers:remove(self)
 end
 
 function Server:unbanUser (user)

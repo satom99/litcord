@@ -117,6 +117,7 @@ function Socket:__listen () -- reading
 					if self.timer then
 						self.timer:stop()
 						self.timer:close()
+						self.timer = nil
 					end
 					self.status = constants.socket.status.IDLE
 					if not self.__manualDisconnect and self.client.settings.auto_reconnect then

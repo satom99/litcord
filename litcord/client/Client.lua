@@ -277,6 +277,7 @@ function Client:__initHandlers ()
 			server:update(data)
 			--
 			for _,v in ipairs(members) do
+				v.guild_id = data.id
 				self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
 			end
 			--

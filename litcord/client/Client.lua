@@ -31,7 +31,7 @@ end
 
 function Client:login (config)
 	if not config or (not config.token and not (config.email and config.password)) then
-		return print('* Wrong or not specified login details.')
+		return print('* Invalid login details.')
 	end
 	coroutine.wrap(
 		function()

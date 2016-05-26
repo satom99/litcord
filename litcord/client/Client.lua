@@ -69,7 +69,10 @@ function Client:setStats (config)
 			{
 				method = 'PATCH',
 				path = self.rest.endPoints.USERS_ME,
-				data = config,
+				data = {
+					username = config.username or self.user.username,
+					avatar = config.avatar or self.user.avatar,
+				},
 			}
 		)
 	end
@@ -152,6 +155,17 @@ function Client:__initHandlers ()
 				end
 				return
 			end
+			if not user then
+				user = structures.User(self)
+				self.users:add(user)
+			end
+			user:update(data)
+		end
+	)
+	self:on(
+		constants.events.USER_UPDATE,
+		function(data)
+			local user = self.users:get('id', data.id)
 			if not user then
 				user = structures.User(self)
 				self.users:add(user)
@@ -284,6 +298,31 @@ function Client:__initHandlers ()
 			for _,v in ipairs(members) do
 				v.guild_id = data.id
 				self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
+			end
+			--
+			if self.settings.force_fetch then
+				local offset = 0
+				local limit = 1000
+				while true do
+					local users = self.rest:request(
+						{
+							method = 'GET',
+							path = 'guilds/'..data.id..'/members',
+							data = {
+								limit = limit,
+								offset = offset,
+							}
+						}
+					)
+					if not users then break end
+					for _,v in ipairs(users) do
+						self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
+					end
+					if #users < limit then
+						break
+					end
+					offset = offset + limit
+				end
 			end
 			--
 			for _,v in ipairs(channels) do

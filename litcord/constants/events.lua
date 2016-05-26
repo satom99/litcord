@@ -9,6 +9,7 @@ return
 	
 	-- Users
 	PRESENCE_UPDATE = 'presence_update',
+	USER_UPDATE = 'user_update',
 	
 	-- Guilds
 	GUILD_CREATE = 'guild_create',

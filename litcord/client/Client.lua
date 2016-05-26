@@ -64,7 +64,7 @@ function Client:setStats (config)
 			}
 		)
 	end
-	if config.name or config.avatar then
+	if config.username or config.avatar then
 		self.rest:request(
 			{
 				method = 'PATCH',

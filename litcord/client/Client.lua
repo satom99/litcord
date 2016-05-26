@@ -53,13 +53,13 @@ end
 
 -- Stats
 function Client:setStats (config)
-	if config.game then
+	if config.idle or config.game then
 		self.socket:send(
 			constants.socket.OPcodes.STATUS_UPDATE,
 			{
-				idle_since = json.null,
+				idle_since = (self.user.idle_since or json.null),
 				game = {
-					name = config.game,
+					name = (config.game or self.user.game_name or json.null),
 				}
 			}
 		)
@@ -75,6 +75,7 @@ function Client:setStats (config)
 	end
 end
 function Client:setGame (game)
+	self.user.game_name = game
 	self:setStats({game = game})
 end
 function Client:setName (name)
@@ -82,6 +83,10 @@ function Client:setName (name)
 end
 function Client:setAvatar (avatar)
 	self:setStats({avatar = avatar})
+end
+function Client:setIdle (idle)
+	self.user.idle_since = (idle and 1)
+	self:setStats({idle = true})
 end
 
 -- Invites

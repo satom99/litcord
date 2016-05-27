@@ -4,7 +4,7 @@ local Cache = class()
 
 function Cache:__constructor (discriminator)
 	self.discriminator = discriminator or 'id'
-	self.__typeComparsion = tonumber
+	self.__typeComparsion = tostring
 	self.__data = {}
 end
 

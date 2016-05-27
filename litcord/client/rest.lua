@@ -22,25 +22,39 @@ function rest:request (config)
 		timer.sleep(500)
 	end
 	--
+	local data = (config.data or {})
 	local method = (config.type or config.method or 'GET'):upper()
-	local data = json.encode((config.data or {})) -- avoiding content-length missing errors
-	local response, received = http.request(
-		method,
-		rest.base..'/'..config.path,
+	local headers =
+	{
 		{
+			'User-Agent',
+			package.name..' ('..package.homepage..', '..package.version..')'
+		},
+		{
+			'Authorization',
+			self.client.socket.token
+		},
+	}
+	if method == 'GET' then
+		config.path = config.path..'?z'
+		for k,v in pairs(data) do
+			config.path = config.path..'&'..k..'='..v
+		end
+		data = nil
+	else
+		table.insert(
+			headers,
 			{
 				'Content-Type',
 				'application/json',
-			},
-			{
-				'User-Agent',
-				package.name..' ('..package.homepage..', '..package.version..')',
-			},
-			{
-				'Authorization',
-				self.client.socket.token,
-			},
-		},
+			}
+		)
+		data = json.encode(data)
+	end
+	local response, received = http.request(
+		method,
+		rest.base..'/'..config.path,
+		headers,
 		data
 	)
 	if response.code > 399 then

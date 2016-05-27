@@ -149,7 +149,7 @@ function Client:__initHandlers ()
 		constants.events.PRESENCE_UPDATE,
 		function(data)
 			local user = self.users:get('id', data.id)
-			if data.status == 'offline' then
+			if not self.settings.force_fetch and (data.status == 'offline') then
 				if user then
 					self.users:remove(user)
 				end
@@ -251,6 +251,7 @@ function Client:__initHandlers ()
 			end
 			author:update(data.author)
 			--
+			data.author = nil
 			local message = structures.Message(channel, author)
 			channel.history:add(message)
 			message:update(data)
@@ -267,6 +268,7 @@ function Client:__initHandlers ()
 			if not channel then return end -- rip
 			local message = channel.history:get('id', data.id)
 			if not message then return end
+			data.author = nil
 			message:update(data)
 			self:dispatchEvent(
 				'messageUpdated',
@@ -300,31 +302,6 @@ function Client:__initHandlers ()
 				self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
 			end
 			--
-			if self.settings.force_fetch then
-				local offset = 0
-				local limit = 1000
-				while true do
-					local users = self.rest:request(
-						{
-							method = 'GET',
-							path = 'guilds/'..data.id..'/members',
-							data = {
-								limit = limit,
-								offset = offset,
-							}
-						}
-					)
-					if not users then break end
-					for _,v in ipairs(users) do
-						self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
-					end
-					if #users < limit then
-						break
-					end
-					offset = offset + limit
-				end
-			end
-			--
 			for _,v in ipairs(channels) do
 				v.guild_id = data.id
 				self:dispatchEvent(constants.events.CHANNEL_CREATE, v)
@@ -336,6 +313,21 @@ function Client:__initHandlers ()
 					{
 						guild_id = data.id,
 						role = v,
+					}
+				)
+			end
+		end
+	)
+	self:on(
+		constants.events.GUILD_CREATE,
+		function(data)
+			if self.settings.force_fetch then
+				self.socket:send(
+					constants.socket.OPcodes.REQUEST_GUILD_MEMBERS,
+					{
+						guild_id = data.id,
+						query = '',
+						limit = 0,
 					}
 				)
 			end
@@ -363,6 +355,15 @@ function Client:__initHandlers ()
 			local member = structures.ServerMember(server)
 			member:update(data)
 			server.members:add(member)
+		end
+	)
+	self:on(
+		constants.events.GUILD_MEMBERS_CHUNK,
+		function(data)
+			for _,v in ipairs(data.members) do
+				v.guild_id = data.guild_id
+				self:dispatchEvent(constants.events.GUILD_MEMBER_ADD, v)
+			end
 		end
 	)
 	self:on(

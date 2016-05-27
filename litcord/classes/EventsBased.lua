@@ -29,7 +29,7 @@ function EventsBased:dispatchEvent (name, data)
 		i = i - removed
 		local v = self.__eventHandlers[i]
 		if v.name == name:lower() then
-			coroutine.wrap( -- callback may have rest requests so adding this prevents main thread from freezing
+			coroutine.wrap( -- callback may have rest requests so doing this prevents main thread from freezing
 				function()
 					v.callback(data)
 				end

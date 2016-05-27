@@ -10,6 +10,7 @@ local class = require('../classes/new')
 local VoiceConnection = class(base)
 
 function VoiceConnection:__constructor () -- .parent = channel / .parent = server / .parent = client
+	self.status = constants.socket.status.IDLE
 	self.parent.parent.parent:once(
 		{
 			constants.events.VOICE_STATE_UPDATE,
@@ -35,7 +36,7 @@ function VoiceConnection:disconnect ()
 end
 
 function VoiceConnection:__onUpdate ()
-	if not self.user_id or not self.session_id or not self.token or not self.guild_id or not self.endpoint then return end
+	if (self.status == constants.socket.status.CONNECTED) or not self.user_id or not self.session_id or not self.token or not self.guild_id or not self.endpoint then return end
 	self.endpoint = 'wss://'..self.endpoint..'/'
 	coroutine.wrap(
 		function()
@@ -45,15 +46,18 @@ function VoiceConnection:__onUpdate ()
 end
 
 function VoiceConnection:__events (opcode, data)
-	if opcode == 2 then
-		self:update(data)
-		--
+	if opcode == constants.voice.OPcodes.READY then
 		self.timer = timer.setInterval(
 			data.heartbeat_interval,
 			function()
-				self:send(3)
+				self:__send(
+					constants.voice.OPcodes.HEARTBEAT
+				)
 			end
 		)
+		--
+		data.heartbeat_interval = nil
+		self.udp_data = data
 	end
 end
 
@@ -78,10 +82,13 @@ end
 
 function VoiceConnection:__connect ()
 	local url = WebSocket.parseUrl(self.endpoint)
+	url.port = 443
 	_, self.__read, self.__write = WebSocket.connect(url)
+	self.status = constants.socket.status.CONNECTED
 	--
+	print('Connected to voice ws.')
 	self:__send(
-		0,
+		constants.voice.OPcodes.IDENTIFY,
 		{
 			user_id = self.user_id,
 			session_id = self.session_id,
@@ -98,15 +105,17 @@ function VoiceConnection:__listen () -- reading
 		function()
 			while true do
 				if not self.__read then break end
-				if type(self.__read) == 'string' then
+				if type(self.__read) == 'string' then -- most likely an error
 					print(self.__read)
-				end
-				local read = self.__read()
-				if read and read.payload then
-					local data = json.decode(read.payload)
-					self:__events(data.op, data.d)
+					return
 				else
-					-- disconnected
+					local read = self.__read()
+					if read and read.payload then
+						local data = json.decode(read.payload)
+						self:__events(data.op, data.d)
+					else
+						-- disconnected
+					end
 				end
 			end
 		end

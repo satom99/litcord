@@ -41,6 +41,9 @@ function rest:request (config)
 			config.path = config.path..'&'..k..'='..v
 		end
 		data = nil
+	elseif method == 'DELETE' then
+		data = nil
+		-- nothing
 	else
 		table.insert(
 			headers,

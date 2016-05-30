@@ -1,5 +1,8 @@
 local json = require('json')
 local timer = require('timer')
+local dns = require('dns')
+local dgram = require('dgram')
+local Buffer = require('buffer').Buffer
 local WebSocket = require('coro-websocket')
 
 local constants = require('../constants')
@@ -37,12 +40,29 @@ end
 
 function VoiceConnection:__onUpdate ()
 	if (self.status == constants.socket.status.CONNECTED) or not self.user_id or not self.session_id or not self.token or not self.guild_id or not self.endpoint then return end
-	self.endpoint = 'wss://'..self.endpoint..'/'
+	local parsed = WebSocket.parseUrl('wss://'..self.endpoint..'/')
+	self.endpoint = parsed.host -- removing port from endpoint, basically
 	coroutine.wrap(
 		function()
 			self:__connect()
 		end
 	)()
+end
+
+function writeUIntBE (buffer, value, offset, length)
+	value = math.abs(value)
+	value = bit.tobit(value)
+	offset = bit.rshift(offset, 31)
+	length = bit.rshift(length, 31)
+	local i = length - 1
+	local mul = 1
+	buffer[offset + i] = bit.band(value, 0xFF)
+	print('b')
+	while (i >= 0) do
+		buffer[offset + i] = bit.band(bit.rshift((value / mul), 31), 0xFF)
+		i = i - 1
+		mul = mul * 0x100
+	end
 end
 
 function VoiceConnection:__events (opcode, data)
@@ -56,9 +76,48 @@ function VoiceConnection:__events (opcode, data)
 			end
 		)
 		--
-		data.heartbeat_interval = nil
-		self.udp_data = data
+		self:__initUDP(data)
 	end
+end
+
+function VoiceConnection:__initUDP (data)
+	local packet = Buffer:new(70)
+	packet[1] = data.ssrc
+	--writeUIntBE(packet, data.ssrc, 0, 4)
+	--
+	self.__udp = dgram.createSocket(
+		'udp4',
+		function(data)
+			print('udp data: '..tostring(data))
+		end
+	)
+	for port = 0, 65535 do
+		self.__udp:bind(
+			port,
+			'0.0.0.0',
+			{
+				exclusive = true,
+			}
+		)
+	end
+	dns.resolve4(
+		self.endpoint,
+		function(_, addresses)
+			local address = addresses[1].address
+			print('UDP: '..address..':'..data.port)
+			self.__udp:send(
+				packet:toString(0, 4),
+				data.port,
+				address,
+				function(err)
+					if err then
+						print('udp send error: '..tostring(err))
+						os.exit()
+					end
+				end
+			)
+		end
+	)
 end
 
 function VoiceConnection:__send (opcode, data)
@@ -81,7 +140,8 @@ function VoiceConnection:__send (opcode, data)
 end
 
 function VoiceConnection:__connect ()
-	local url = WebSocket.parseUrl(self.endpoint)
+	local endpoint = 'wss://'..self.endpoint..'/'
+	local url = WebSocket.parseUrl(endpoint)
 	url.port = 443
 	_, self.__read, self.__write = WebSocket.connect(url)
 	self.status = constants.socket.status.CONNECTED

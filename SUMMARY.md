@@ -1,4 +1,0 @@
-# Summary
-
-* [General](general.md)
-

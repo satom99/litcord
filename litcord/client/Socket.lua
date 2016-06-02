@@ -10,18 +10,19 @@ local constants = require('../constants')
 local Socket = class()
 
 function Socket:__constructor (client)
-	self.client = client
+	self.__client = client
 	self.status = constants.socket.status.IDLE
 	--
 	client:on(
 		constants.events.READY,
 		function(data)
-			self.timer = timer.setInterval(
+			self.__sessionID = data.session_id
+			self.__timer = timer.setInterval(
 				data.heartbeat_interval,
 				function()
 					self:send(
 						constants.socket.OPcodes.HEARTBEAT,
-						self.sequence
+						self.__sequence
 					)
 				end
 			)
@@ -57,7 +58,7 @@ function Socket:connect ()
 	if self.status == constants.socket.status.CONNECTED then return end
 	if not self.gateway then
 		print('Retrieving gateway.')
-		self.gateway = self.client.rest:request(
+		self.gateway = self.__client.rest:request(
 			{
 				method = 'GET',
 				path = 'gateway',
@@ -74,23 +75,35 @@ function Socket:connect ()
 	end
 	--
 	self.status = constants.socket.status.CONNECTED
-	print('Connected, identifying.')
-	self:send(
-		constants.socket.OPcodes.IDENTIFY,
-		{
-			token = self.token,
-			properties =
+	if not (self.__sessionID and self.__sequence) then
+		print('Connected, identifying.')
+		self:send(
+			constants.socket.OPcodes.IDENTIFY,
 			{
-				['$os'] = package.name,
-				['$device'] = package.name,
-				['$browser'] = '',
-				['$referrer'] = '',
-				['$referring_domain'] = package.homepage,
-			},
-			compress = false,
-			large_threshold = self.client.settings.large_threshold,
-		}
-	)
+				token = self.token,
+				properties =
+				{
+					['$os'] = package.name,
+					['$device'] = package.name,
+					['$browser'] = '',
+					['$referrer'] = '',
+					['$referring_domain'] = package.homepage,
+				},
+				compress = false,
+				large_threshold = self.__client.settings.large_threshold,
+			}
+		)
+	else
+		print('Connected, resuming.')
+		self:send(
+			constants.socket.OPcodes.RESUME,
+			{
+				token = self.token,
+				session_id = self.__sessionID,
+				seq = self.__sequence,
+			}
+		)
+	end
 	--
 	self:__listen()
 end
@@ -109,18 +122,18 @@ function Socket:__listen () -- reading
 				if read and read.payload then
 					local data = json.decode(read.payload)
 					if data.op == constants.socket.OPcodes.DISPATCH then
-						self.sequence = data.s
-						self.client:dispatchEvent(data.t, data.d)
+						self.__sequence = data.s
+						self.__client:dispatchEvent(data.t, data.d)
 					end
 				else
 					print('Disconnected.')
-					if self.timer then
-						self.timer:stop()
-						self.timer:close()
-						self.timer = nil
+					if self.__timer then
+						self.__timer:stop()
+						self.__timer:close()
+						self.__timer = nil
 					end
 					self.status = constants.socket.status.IDLE
-					if not self.__manualDisconnect and self.client.settings.auto_reconnect then
+					if not self.__manualDisconnect and self.__client.settings.auto_reconnect then
 						print('Reconnecting.')
 						self.status = constants.socket.status.RECONNECTING
 						self:__reconnect()

@@ -34,6 +34,7 @@ function Socket:__initHandlers ()
 	self:on(
 		constants.socket.OPcodes.INVALID_SESSION,
 		function()
+			self.__sessionID = nil
 			self.__write()
 		end
 	)
@@ -74,6 +75,7 @@ function Socket:__initHandlers ()
 						},
 						compress = false,
 						large_threshold = self.__client.settings.large_threshold,
+						shard = self.__client.settings.shard,
 					}
 				)
 			else

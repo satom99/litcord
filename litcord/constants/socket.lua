@@ -17,5 +17,6 @@ return
 		RECONNECT = 7,
 		REQUEST_GUILD_MEMBERS = 8,
 		INVALID_SESSION = 9,
+		HELLO = 10,
 	}
 }

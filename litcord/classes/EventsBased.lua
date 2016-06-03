@@ -9,7 +9,7 @@ function EventsBased:once (events, callback)
 	self:on(events, callback, true)
 end
 function EventsBased:on (events, callback, once)
-	if type(events) == 'string' then
+	if type(events) ~= 'table' then
 		events = {events}
 	end
 	for _,name in ipairs(events) do
@@ -17,19 +17,20 @@ function EventsBased:on (events, callback, once)
 			self.__eventHandlers,
 			{
 				once = once,
-				name = name:lower(),
+				name = tonumber(name) or name:lower(),
 				callback = callback,
 			}
 		)
 	end
 end
 function EventsBased:dispatchEvent (name, data)
+	name = tonumber(name) or name:lower()
 	local removed = 0
 	for i = 1, #self.__eventHandlers do
 		i = i - removed
 		local v = self.__eventHandlers[i]
-		if v.name == name:lower() then
-			coroutine.wrap( -- callback may have rest requests so doing this prevents main thread from freezing
+		if v.name == name then
+			coroutine.wrap(
 				function()
 					v.callback(data)
 				end

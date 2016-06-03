@@ -2,21 +2,39 @@ local json = require('json')
 local timer = require('timer')
 local WebSocket = require('coro-websocket')
 
-local class = require('../classes/new')
+local classes = require('../classes')
 local package = require('../package')
 local constants = require('../constants')
 
 
-local Socket = class()
+local Socket = classes.new(classes.EventsBased)
 
 function Socket:__constructor (client)
 	self.__client = client
 	self.status = constants.socket.status.IDLE
-	--
-	client:on(
-		constants.events.READY,
+	self:__initHandlers()
+end
+
+function Socket:__initHandlers ()
+	self:on(
+		constants.socket.OPcodes.DISPATCH,
 		function(data)
+			self.__sequence = data.s
+			self.__client:dispatchEvent(data.t, data.d)
+		end
+	)
+	--
+	self:on(
+		constants.socket.OPcodes.READY,
+		function(data)
+			data = data.d
 			self.__sessionID = data.session_id
+		end
+	)
+	self:on(
+		constants.socket.OPcodes.HELLO,
+		function(data)
+			data = data.d
 			self.__timer = timer.setInterval(
 				data.heartbeat_interval,
 				function()
@@ -26,8 +44,39 @@ function Socket:__constructor (client)
 					)
 				end
 			)
+			-- Identifying/resuming
+			if not (self.__sessionID and self.__sequence) then
+				print('Identifying.')
+				self:send(
+					constants.socket.OPcodes.IDENTIFY,
+					{
+						token = self.token,
+						properties =
+						{
+							['$os'] = package.name,
+							['$device'] = package.name,
+							['$browser'] = '',
+							['$referrer'] = '',
+							['$referring_domain'] = package.homepage,
+						},
+						compress = false,
+						large_threshold = self.__client.settings.large_threshold,
+					}
+				)
+			else
+				print('Resuming.')
+				self:send(
+					constants.socket.OPcodes.RESUME,
+					{
+						token = self.token,
+						session_id = self.__sessionID,
+						seq = self.__sequence,
+					}
+				)
+			end
 		end
 	)
+	self.__initHandlers = nil
 end
 
 function Socket:send (opcode, data)
@@ -67,6 +116,7 @@ function Socket:connect ()
 	end
 	print('Connecting.')
 	local url = WebSocket.parseUrl(self.gateway)
+	url.pathname = url.pathname..'?v=5'
 	_, self.__read, self.__write = WebSocket.connect(url)
 	--
 	if not self.__read or not self.__write then
@@ -75,36 +125,6 @@ function Socket:connect ()
 	end
 	--
 	self.status = constants.socket.status.CONNECTED
-	if not (self.__sessionID and self.__sequence) then
-		print('Connected, identifying.')
-		self:send(
-			constants.socket.OPcodes.IDENTIFY,
-			{
-				token = self.token,
-				properties =
-				{
-					['$os'] = package.name,
-					['$device'] = package.name,
-					['$browser'] = '',
-					['$referrer'] = '',
-					['$referring_domain'] = package.homepage,
-				},
-				compress = false,
-				large_threshold = self.__client.settings.large_threshold,
-			}
-		)
-	else
-		print('Connected, resuming.')
-		self:send(
-			constants.socket.OPcodes.RESUME,
-			{
-				token = self.token,
-				session_id = self.__sessionID,
-				seq = self.__sequence,
-			}
-		)
-	end
-	--
 	self:__listen()
 end
 
@@ -112,7 +132,7 @@ function Socket:__reconnect ()
 	self:connect()
 end
 
-function Socket:__listen () -- reading
+function Socket:__listen ()
 	print('Listening.')
 	coroutine.wrap(
 		function()
@@ -121,10 +141,7 @@ function Socket:__listen () -- reading
 				local read = self.__read()
 				if read and read.payload then
 					local data = json.decode(read.payload)
-					if data.op == constants.socket.OPcodes.DISPATCH then
-						self.__sequence = data.s
-						self.__client:dispatchEvent(data.t, data.d)
-					end
+					self:dispatchEvent(data.op, data)
 				else
 					print('Disconnected.')
 					if self.__timer then

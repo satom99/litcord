@@ -25,6 +25,19 @@ function Socket:__initHandlers ()
 	)
 	--
 	self:on(
+		constants.socket.OPcodes.RECONNECT,
+		function()
+			self.gateway = nil
+			self.__write()
+		end
+	)
+	self:on(
+		constants.socket.OPcodes.INVALID_SESSION,
+		function()
+			self.__write()
+		end
+	)
+	self:on(
 		constants.socket.OPcodes.READY,
 		function(data)
 			data = data.d

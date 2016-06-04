@@ -13,6 +13,12 @@ local class = require('../classes/new')
 local VoiceConnection = class(base)
 
 function VoiceConnection:__constructor () -- .parent = channel / .parent = server / .parent = client
+	do
+		print('* Voice is not fully implemented yet.')
+		self.parent:leave()
+		return
+	end
+	--
 	self.status = constants.socket.status.IDLE
 	self.parent.parent.parent:once(
 		{
@@ -35,7 +41,7 @@ function VoiceConnection:__constructor () -- .parent = channel / .parent = serve
 end
 
 function VoiceConnection:disconnect ()
-	self.timer:stop()
+	self.__write()
 end
 
 function VoiceConnection:__onUpdate ()
@@ -100,6 +106,7 @@ function VoiceConnection:__initUDP (data)
 			}
 		)
 	end
+	print('resolving: '..self.endpoint)
 	dns.resolve4(
 		self.endpoint,
 		function(_, addresses)
@@ -173,8 +180,10 @@ function VoiceConnection:__listen () -- reading
 					if read and read.payload then
 						local data = json.decode(read.payload)
 						self:__events(data.op, data.d)
-					else
-						-- disconnected
+					else -- disconnected
+						self.timer:stop()
+						self.timer:close()
+						self.timer = nil
 					end
 				end
 			end

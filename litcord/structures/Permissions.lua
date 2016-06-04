@@ -15,9 +15,9 @@ local base = require('./base')
 
 local constants = require('../constants')
 
-local Permissions = class(base)
+local Permissions = class(base) -- .parent = Overwrite/Role / .parent = server / .parent = client
 
-function Permissions:__constructor (_, value) -- .parent = Overwrite/Role / .parent = server / .parent = client
+function Permissions:__update (value)
 	value = value or 0
 	self.allow = value
 	self.deny = bit.bnot(value)

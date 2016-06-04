@@ -1,5 +1,6 @@
 local json = require('json')
 
+local utils = require('../utils')
 local classes = require('../classes')
 local constants = require('../constants')
 local structures = require('../structures')
@@ -12,12 +13,7 @@ local Client = classes.new(classes.EventsBased)
 
 function Client:__constructor (settings)
 	-- Settings
-	self.settings = constants.settings
-	if settings then
-		for k,v in pairs(settings) do
-			self.settings[k] = v
-		end
-	end
+	self.settings = utils.merge(constants.settings, settings)
 	-- Storage
 	self.users = classes.Cache()
 	self.servers = classes.Cache()
@@ -35,17 +31,25 @@ function Client:login (config)
 	end
 	coroutine.wrap(
 		function()
-			self.socket.token = config.token or self.rest:request(
-				{
-					method = 'POST',
-					path = self.rest.endPoints.LOGIN,
-					data =
+			self.socket.token = config.token
+			if not self.socket.token then
+				local response = self.rest:request(
 					{
-						email = config.email,
-						password = config.password,
-					},
-				}
-			).token
+						method = 'POST',
+						path = self.rest.endPoints.LOGIN,
+						data =
+						{
+							email = config.email,
+							password = config.password,
+						},
+					}
+				)
+				if not response then
+					print('* Wrong login details.')
+					return
+				end
+				self.socket.token = response.token
+			end
 			self.socket:connect()
 		end
 	)()
@@ -336,7 +340,12 @@ function Client:__initHandlers ()
 	self:on(
 		constants.events.GUILD_DELETE,
 		function(data)
-			self.servers:remove(data)
+			local server = self.servers:get('id', data.id)
+			if not server then return end
+			for _,v in ipairs(server.members:getAll()) do
+				v.user.servers:remove(server)
+			end
+			self.servers:remove(server)
 		end
 	)
 	-- Guild members
@@ -355,6 +364,8 @@ function Client:__initHandlers ()
 			local member = structures.ServerMember(server)
 			member:update(data)
 			server.members:add(member)
+			--
+			user.servers:add(server)
 		end
 	)
 	self:on(
@@ -371,7 +382,10 @@ function Client:__initHandlers ()
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
 			if not server then return end
-			server.members:remove(data.user)
+			local user = self.users:get('id', data.user.id)
+			if not user then return end
+			user.servers:remove(server)
+			server.members:remove(user)
 		end
 	)
 	-- Guild roles
@@ -388,9 +402,9 @@ function Client:__initHandlers ()
 				role = structures.Role(server)
 				server.roles:add(role)
 			end
-			data.role.permissions = structures.Permissions(role, data.role.permissions)
+			role.permissions:__update(data.role.permissions)
+			data.role.permissions = nil
 			role:update(data.role)
-			server.roles:add(role)
 		end
 	)
 	self:on(

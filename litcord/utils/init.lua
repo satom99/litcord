@@ -1,0 +1,4 @@
+return
+{
+	merge = require('./merge'),
+}

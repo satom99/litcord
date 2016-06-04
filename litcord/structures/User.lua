@@ -1,8 +1,10 @@
-local class = require('../classes/new')
+local classes = require('../classes')
 local base = require('./base')
 
-local User = class(base)
+local User = classes.new(base)
 
---
+function User:__constructor ()
+	self.servers = classes.Cache()
+end
 
 return User

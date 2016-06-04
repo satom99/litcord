@@ -36,9 +36,11 @@ function rest:request (config)
 		},
 	}
 	if method == 'GET' then
-		config.path = config.path..'?z'
+		local i = 1
 		for k,v in pairs(data) do
-			config.path = config.path..'&'..k..'='..v
+			local ch = ((i == 1) and '?') or '&'
+			config.path = config.path..ch..k..'='..v
+			i = i + 1
 		end
 		data = nil
 	elseif method == 'DELETE' then
@@ -54,12 +56,20 @@ function rest:request (config)
 		)
 		data = json.encode(data)
 	end
-	local response, received = http.request(
-		method,
-		rest.base..'/'..config.path,
-		headers,
-		data
+	local success, response, received = pcall(
+		function()
+			return http.request(
+				method,
+				rest.base..'/'..config.path,
+				headers,
+				data
+			)
+		end
 	)
+	if not success then
+		local name = response:sub(response:find(' ') + 1)
+		return print('* Unhandled HTTP error: '..name..' ('..config.path..')')
+	end
 	if response.code > 399 then
 		if response.code == 429 then
 			local retry = 0

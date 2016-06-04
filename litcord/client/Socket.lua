@@ -27,7 +27,7 @@ function Socket:__initHandlers ()
 	self:on(
 		constants.socket.OPcodes.RECONNECT,
 		function()
-			self.gateway = nil
+			self.__gateway = nil
 			self.__write()
 		end
 	)
@@ -58,7 +58,6 @@ function Socket:__initHandlers ()
 					)
 				end
 			)
-			-- Identifying/resuming
 			if not (self.__sessionID and self.__sequence) then
 				print('Identifying.')
 				self:send(
@@ -120,17 +119,23 @@ end
 
 function Socket:connect ()
 	if self.status == constants.socket.status.CONNECTED then return end
-	if not self.gateway then
+	if not self.__gateway then
 		print('Retrieving gateway.')
-		self.gateway = self.__client.rest:request(
+		local response = self.__client.rest:request(
 			{
 				method = 'GET',
 				path = 'gateway',
 			}
-		).url..'/'
+		)
+		if not response then
+			print('Unable to retrieve gateway.')
+			return
+		end
+		self.__gateway = response.url..'/'
 	end
+	--
 	print('Connecting.')
-	local url = WebSocket.parseUrl(self.gateway)
+	local url = WebSocket.parseUrl(self.__gateway)
 	url.pathname = url.pathname..'?v=5'
 	_, self.__read, self.__write = WebSocket.connect(url)
 	--

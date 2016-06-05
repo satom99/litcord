@@ -4,8 +4,10 @@ return
 	READY = 'ready',
 	
 	-- Messages
-	MESSAGE_CREATE = 'message_create',
 	MESSAGE_UPDATE = 'message_update',
+	MESSAGE_CREATE = 'message_create',
+	MESSAGE_DELETE = 'message_delete',
+	MESSAGE_DELETE_BULK = 'message_delete_bulk',
 	
 	-- Users
 	PRESENCE_UPDATE = 'presence_update',

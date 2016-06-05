@@ -280,6 +280,28 @@ function Client:__initHandlers ()
 			)
 		end
 	)
+	self:on(
+		constants.events.MESSAGE_DELETE,
+		function(data)
+			local channel = self.__channels:get('id', data.channel_id)
+			if not channel then return end
+			local message = channel.history:get('id', data.id)
+			if not message then return end
+			channel.history:remove(message)
+		end
+	)
+	self:on(
+		constants.events.MESSAGE_DELETE_BULK,
+		function(data)
+			local channel = self.__channels:get('id', data.channel_id)
+			if not channel then return end
+			for _,id in ipairs(data.ids) do
+				local message = channel.history:get('id', id)
+				if not message then return end
+				channel.history:remove(message)
+			end
+		end
+	)
 	-- Guilds
 	self:on(
 		{

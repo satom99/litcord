@@ -64,10 +64,12 @@ function Channel:getInvites()
 			}
 		)
 		for _,v in ipairs(invites) do
+			v.guild = nil
 			v.inviter = nil
 			local invite = Invite(self)
 			invite:update(v)
 			self.invites:add(invite)
+			self.parent.invites:add(invite)
 		end
 	end
 	return self.invites

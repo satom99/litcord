@@ -119,10 +119,18 @@ function Server:getInvites ()
 			}
 		)
 		for _,v in ipairs(invites) do
+			local invite = self.invites:get('code', v.code)
+			if not invite then
+				local channel = self.channels:get('id', v.channel.id)
+				if not channel then return end -- should exist, just making sure
+				channel.__retrievedInvites = true
+				invite = Invite(channel)
+				self.invites:add(invite)
+				channel.invites:add(invite)
+			end
+			v.guild = nil
 			v.inviter = nil
-			local invite = Invite(self)
 			invite:update(v)
-			self.invites:add(invite)
 		end
 	end
 	return self.invites

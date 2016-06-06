@@ -372,7 +372,10 @@ function Client:__initHandlers ()
 	)
 	-- Guild members
 	self:on(
-		constants.events.GUILD_MEMBER_ADD,
+		{
+			constants.events.GUILD_MEMBER_ADD,
+			constants.events.GUILD_MEMBER_UPDATE,
+		},		
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
 			if not server then return end
@@ -382,12 +385,16 @@ function Client:__initHandlers ()
 				self.users:add(user)
 			end
 			user:update(data.user)
-			--
-			local member = structures.ServerMember(server)
-			member:update(data)
-			server.members:add(member)
-			--
 			user.servers:add(server)
+			--
+			data.user = user
+			local member = server.members:get('id', data.user.id)
+			if not member then
+				member = structures.ServerMember(server)
+				member.id = data.user.id
+				server.members:add(member)
+			end
+			member:update(data)
 		end
 	)
 	self:on(

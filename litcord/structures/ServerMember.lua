@@ -37,6 +37,43 @@ function ServerMember:move (channel)
 	end
 	self:edit({channel_id = id})
 end
+function ServerMember:addRole (role)
+	local id = role
+	if type(role) == 'table' then
+		id = role.id
+	end
+	--
+	local roles = {}
+	for _,v in ipairs(self.roles) do
+		if v.id == id then
+			return -- avoiding unnecessary requests
+		end
+		table.insert(roles, v.id)
+	end
+	table.insert(roles, id)
+	--
+	self:edit({roles = roles})
+end
+function ServerMember:revokeRole (role)
+	local id = role
+	if type(role) == 'table' then
+		id = role.id
+	end
+	--
+	local found
+	local roles = {}
+	for _,v in ipairs(self.roles) do
+		if v.id == id then
+			found = true
+			table.remove(roles, v.id)
+		else
+			table.insert(roles, v.id)
+		end
+	end
+	--
+	if not found then return end -- avoiding unnecessary requests
+	self:edit({roles = roles})
+end
 
 function ServerMember:kick ()
 	self.parent.parent.rest:request(

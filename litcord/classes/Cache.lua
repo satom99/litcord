@@ -34,7 +34,7 @@ function Cache:remove (object)
 		if self.__typeComparsion(v[self.discriminator]) == self.__typeComparsion(object[self.discriminator]) then
 			table.remove(self.__data, i)
 			v = nil
-			return
+			break
 		end
 	end
 end
@@ -50,7 +50,7 @@ function Cache:update (new)
 	for _,v in ipairs(self.__data) do
 		if self.__typeComparsion(v[self.discriminator]) == self.__typeComparsion(new[self.discriminator]) then
 			v = new
-			return
+			break
 		end
 	end
 end

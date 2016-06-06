@@ -10,14 +10,15 @@ return
 	MESSAGE_DELETE_BULK = 'message_delete_bulk',
 	
 	-- Users
-	PRESENCE_UPDATE = 'presence_update',
 	USER_UPDATE = 'user_update',
+	PRESENCE_UPDATE = 'presence_update',
 	
 	-- Guilds
 	GUILD_CREATE = 'guild_create',
 	GUILD_UPDATE = 'guild_update',
 	GUILD_DELETE = 'guild_delete',
 	GUILD_MEMBER_ADD = 'guild_member_add',
+	GUILD_MEMBER_UPDATE = 'guild_member_update',
 	GUILD_MEMBERS_CHUNK = 'guild_members_chunk',
 	GUILD_MEMBER_REMOVE = 'guild_member_remove',
 	GUILD_ROLE_CREATE = 'guild_role_create',

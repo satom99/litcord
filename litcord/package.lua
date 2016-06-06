@@ -1,7 +1,7 @@
 return
 {
 	license = 'MIT',
-	version = '0.0.9',
+	version = '0.1.0',
 	name = 'satom99/litcord',
 	description = 'Yet another unofficial Lua client API for Discord.',
 	author = "Santi 'AdamJames' T. <satom99@github>",
@@ -15,7 +15,7 @@ return
 		'discord',
 	},
 	files = {
-		'init.lua',
+		'*.lua',
 		'utils/*.lua',
 		'client/*.lua',
 		'classes/*.lua',

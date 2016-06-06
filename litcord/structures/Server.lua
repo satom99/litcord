@@ -12,7 +12,7 @@ function Server:__constructor ()
 	self.roles = classes.Cache()
 	self.members = classes.Cache()
 	self.channels = classes.Cache()
-	self.invites = classes.Cache()
+	self.invites = classes.Cache('code')
 end
 
 function Server:__onUpdate ()

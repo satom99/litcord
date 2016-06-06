@@ -387,11 +387,11 @@ function Client:__initHandlers ()
 			user:update(data.user)
 			user.servers:add(server)
 			--
+			data.id = user.id
 			data.user = user
-			local member = server.members:get('id', data.user.id)
+			local member = server.members:get('id', user.id)
 			if not member then
 				member = structures.ServerMember(server)
-				member.id = data.user.id
 				server.members:add(member)
 			end
 			member:update(data)

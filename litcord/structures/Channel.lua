@@ -9,8 +9,8 @@ local VoiceConnection = require('./VoiceConnection')
 local Channel = classes.new(base)
 
 function Channel:__constructor ()
-	self.invites = classes.Cache()
 	self.history = classes.Cache()
+	self.invites = classes.Cache('code')
 end
 
 function Channel:__onUpdate ()

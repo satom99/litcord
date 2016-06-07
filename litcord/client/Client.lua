@@ -55,6 +55,20 @@ function Client:login (config)
 	)()
 end
 
+function Client:openDirectMessage (recipient_id)
+	dmChannel = self.rest:request(
+		{
+			method = 'POST',
+			path = self.rest.endPoints.GET_ME_DMS,
+			data = {
+				recipient_id = recipient_id,
+			},
+		}
+	)
+	if dmChannel then
+		self:dispatchEvent(constants.events.CHANNEL_CREATE, dmChannel)
+	end
+end
 -- Stats
 function Client:setStats (config)
 	if config.idle or config.game then

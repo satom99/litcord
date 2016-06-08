@@ -18,12 +18,15 @@ function Invite:accept ()
 end
 
 function Invite:delete ()
-	self.parent.parent.rest:request(
+	local success = self.parent.parent.rest:request(
 		{
 			method = 'DELETE',
 			path = 'invites/'..self.code,
 		}
 	)
+	if not success then return end
+	self.server.invites:remove(self)
+	self.channel.invites:remove(self)
 end
 
 return Invite

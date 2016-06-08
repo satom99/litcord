@@ -87,7 +87,7 @@ function Socket:__listen ()
 					if read and read.payload then
 						local data = json.decode(read.payload)
 						self:dispatchEvent(data.op, data.d)
-					else -- disconnected
+					else
 						print('Disconnected from voice ws.')
 						if self.timer then
 							self.timer:stop()
@@ -97,6 +97,7 @@ function Socket:__listen ()
 						if not self.parent.__manualDisconnect then
 							self.parent:__disconnect()
 						end
+						self.parent.__manualDisconnect = false
 					end
 				end
 			end

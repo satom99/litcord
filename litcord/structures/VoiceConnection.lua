@@ -11,7 +11,8 @@ local VoiceConnection = class(base)
 
 function VoiceConnection:__constructor () -- .parent = server / .parent = client
 	do
-		return error('* Voice is not fully implemented yet.')
+		error('* Voice is not fully implemented yet.')
+		--return
 	end
 	--
 	self.udp = voice.UDP(self)

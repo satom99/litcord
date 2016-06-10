@@ -66,9 +66,9 @@ function Socket:__initHandlers ()
 						token = self.token,
 						properties =
 						{
-							['$os'] = package.name,
+							['$os'] = '',
+							['$browser'] = package.name,
 							['$device'] = package.name,
-							['$browser'] = '',
 							['$referrer'] = '',
 							['$referring_domain'] = package.homepage,
 						},

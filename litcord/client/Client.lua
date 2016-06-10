@@ -150,26 +150,18 @@ function Client:__initHandlers ()
 	)
 	-- Users
 	self:on(
-		constants.events.PRESENCE_UPDATE,
+		{
+			constants.events.USER_UPDATE,
+			constants.events.PRESENCE_UPDATE,
+		},
 		function(data)
 			local user = self.users:get('id', data.id)
-			if not self.settings.force_fetch and (data.status == 'offline') then
+			if not self.settings.force_fetch and (data.status and (data.status == 'offline')) then
 				if user then
 					self.users:remove(user)
 				end
 				return
 			end
-			if not user then
-				user = structures.User(self)
-				self.users:add(user)
-			end
-			user:update(data)
-		end
-	)
-	self:on(
-		constants.events.USER_UPDATE,
-		function(data)
-			local user = self.users:get('id', data.id)
 			if not user then
 				user = structures.User(self)
 				self.users:add(user)
@@ -194,7 +186,7 @@ function Client:__initHandlers ()
 				--
 				data.recipient = nil
 				if not recipient.channel then
-					recipient.channel = structures.Channel(recipient) -- so that 'client' is accessible through User's parent
+					recipient.channel = structures.Channel(recipient)
 					self.__channels:add(recipient.channel)
 				end
 				recipient.channel:update(data)
@@ -246,7 +238,7 @@ function Client:__initHandlers ()
 		constants.events.MESSAGE_CREATE,
 		function(data)
 			local channel = self.__channels:get('id', data.channel_id)
-			if not channel then return end -- rip
+			if not channel then return end -- should exist
 			--
 			local author = self.users:get('id', data.author.id)
 			if not author then
@@ -269,7 +261,7 @@ function Client:__initHandlers ()
 		constants.events.MESSAGE_UPDATE,
 		function(data)
 			local channel = self.__channels:get('id', data.channel_id)
-			if not channel then return end -- rip
+			if not channel then return end -- should exist
 			local message = channel.history:get('id', data.id)
 			if not message then return end
 			data.author = nil

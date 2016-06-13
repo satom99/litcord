@@ -16,6 +16,17 @@ client:on(
 	end
 )
 
+client:on(
+	'message',
+	function(message)
+		if message.author.id == client.user.id then return end
+		if not message.client_mentioned then return end
+		message:reply('interesting..')
+		-- or
+		-- message.channel:sendMessage('interesting..')
+	end
+)
+
 client:login(
 	{
 		--[[

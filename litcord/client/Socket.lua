@@ -67,8 +67,8 @@ function Socket:__initHandlers ()
 						properties =
 						{
 							['$os'] = '',
-							['$browser'] = package.name,
 							['$device'] = package.name,
+							['$browser'] = package.name,
 							['$referrer'] = '',
 							['$referring_domain'] = package.homepage,
 						},

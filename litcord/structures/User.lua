@@ -21,7 +21,7 @@ function User:sendMessage (...)
 				},
 			}
 		)
-		if not self.data then return end
+		if not data then return end
 		self.channel = Channel(self)
 		self.channel:update(data)
 		self.parent.__channels:add(self.channel)

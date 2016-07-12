@@ -12,7 +12,7 @@ end
 
 function User:sendMessage (...)
 	if not self.channel then
-		local data = self.parent:request(
+		local data = self.parent.rest:request(
 			{
 				method = 'POST',
 				path = constants.rest.ME_DMS,
@@ -26,7 +26,7 @@ function User:sendMessage (...)
 		self.channel:update(data)
 		self.parent.__channels:add(self.channel)
 	end
-	self.channel:sendMessage(...)
+	return self.channel:sendMessage(...)
 end
 
 return User

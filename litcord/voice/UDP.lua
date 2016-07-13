@@ -34,20 +34,18 @@ function UDP:disconnect ()
 end
 
 function UDP:connect (data)
-	if not self.connection then
-		self.connection = dgram.createSocket(
-			'udp4',
-			function(data)
-				print('udp data: '..tostring(data))
-			end
-		)
-	end
+	self.connection = dgram.createSocket(
+		'udp4',
+		function(data)
+			print('udp data: '..tostring(data))
+		end
+	)
 	self.connection:bind(
 		0,
 		'0.0.0.0'
 	)
 	dns.resolve4(
-		self.parent.endpoint,
+		self.parent.__data.endpoint,
 		function(_, addresses)
 			local address = addresses[1].address
 			print('UDP: '..address..':'..data.port)
@@ -69,6 +67,7 @@ function UDP:connect (data)
 			)
 		end
 	)
+	self.parent:setSpeaking(true)
 end
 
 return UDP

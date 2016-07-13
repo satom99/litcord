@@ -10,6 +10,7 @@ local Socket = classes.new(classes.EventsBased)
 
 function Socket:__constructor (parent)
 	self.parent = parent
+	self.status = constants.socket.status.IDLE
 	self:__initHandlers()
 end
 
@@ -35,7 +36,7 @@ function Socket:disconnect ()
 end
 
 function Socket:connect ()
-	local endpoint = 'wss://'..self.parent.endpoint..'/'
+	local endpoint = 'wss://'..self.parent.__data.endpoint..'/'
 	local url = WebSocket.parseUrl(endpoint)
 	url.port = 443
 	_, self.__read, self.__write = WebSocket.connect(url)
@@ -45,10 +46,10 @@ function Socket:connect ()
 	self:send(
 		constants.voice.OPcodes.IDENTIFY,
 		{
-			user_id = self.parent.user_id,
-			session_id = self.parent.session_id,
-			token = self.parent.token,
-			server_id = self.parent.guild_id,
+			user_id = self.parent.__data.user_id,
+			session_id = self.parent.__data.session_id,
+			token = self.parent.__data.token,
+			server_id = self.parent.__data.guild_id,
 		}
 	)
 	--
@@ -88,6 +89,7 @@ function Socket:__listen ()
 						local data = json.decode(read.payload)
 						self:dispatchEvent(data.op, data.d)
 					else
+						self.status = constants.socket.status.IDLE
 						print('Disconnected from voice ws.')
 						if self.timer then
 							self.timer:stop()

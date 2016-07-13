@@ -15,6 +15,7 @@ function VoiceConnection:__constructor () -- .parent = server / .parent = client
 		--return
 	end
 	--
+	self.__data = {}
 	self.__udp = voice.UDP(self)
 	self.__socket = voice.Socket(self)
 	self.__socket:on(
@@ -30,7 +31,10 @@ function VoiceConnection:__constructor () -- .parent = server / .parent = client
 			constants.events.VOICE_SERVER_UPDATE,
 		},
 		function(data)
-			self:update(data)
+			for k,v in pairs(data) do
+				self.__data[k] = v
+			end
+			self:__onUpdate()
 		end
 	)
 end
@@ -67,6 +71,7 @@ function VoiceConnection:disconnect ()
 end
 
 function VoiceConnection:__disconnect ()
+	self.__data = {}
 	self.__udp:disconnect()
 	self.parent.parent.socket:send(
 		constants.socket.OPcodes.VOICE_STATE_UPDATE,
@@ -80,9 +85,9 @@ function VoiceConnection:__disconnect ()
 end
 
 function VoiceConnection:__onUpdate ()
-	if (self.__socket.status == constants.socket.status.CONNECTED) or not self.user_id or not self.session_id or not self.token or not self.guild_id or not self.endpoint then return end
-	local parsed = WebSocket.parseUrl('wss://'..self.endpoint..'/')
-	self.endpoint = parsed.host -- removing port from endpoint, basically
+	if (self.__socket.status == constants.socket.status.CONNECTED) or not self.__data.user_id or not self.__data.session_id or not self.__data.token or not self.__data.guild_id or not self.__data.endpoint then return end
+	local parsed = WebSocket.parseUrl('wss://'..self.__data.endpoint..'/')
+	self.__data.endpoint = parsed.host -- removing port from endpoint, basically
 	coroutine.wrap(
 		function()
 			self.__socket:connect()

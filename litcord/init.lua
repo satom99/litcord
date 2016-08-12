@@ -6,8 +6,7 @@ structures = {}
 structures.base = require('litcord.structures.base')
 structures = require('litcord.structures')
 
-package.path = package.path..';?.5.rockspec;'
-require('litcord.litcord-0')
+require('litcord.package')
 library = {
 	name = package,
 	version = version,

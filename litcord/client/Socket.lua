@@ -1,4 +1,3 @@
-local tools = require('websocket.tools')
 local WebSocket = require('websocket').client.sync
 
 local Socket = class(utils.Events)
@@ -96,7 +95,7 @@ end
 
 function Socket:disconnect()
 	self.disconnect_manual = true
-	self.socket:close() -- server closes with code 1006 = no overlap with heartbeat
+	self.socket:close()
 end
 
 function Socket:connect ()
@@ -158,7 +157,7 @@ function Socket:listen ()
 					print('* Socket closed with code '..code..' ('..reason..')')
 					self.status = constants.socket.status.IDLE
 					self.heartbeat:stop()
-					if (code == 1000) or (not self.disconnect_manual) then
+					if not self.disconnect_manual then
 						self:connect() -- reconnect
 					end
 					self.disconnect_manual = false

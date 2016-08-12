@@ -22,7 +22,6 @@ build = {
 		lua = {
 			['litcord.init'] = 'litcord/init.lua',
 			['litcord.class'] = 'litcord/class.lua',
-			['litcord.package'] = 'litcord/litcord-'..version..'.rockspec',
 			--
 			['litcord.utils.init'] = 'litcord/utils/init.lua',
 			['litcord.utils.sleep'] = 'litcord/utils/sleep.lua',

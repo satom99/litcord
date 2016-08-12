@@ -5,12 +5,10 @@ constants = require('litcord.constants')
 structures = {}
 structures.base = require('litcord.structures.base')
 structures = require('litcord.structures')
-
-require('litcord.package')
 library = {
-	name = package,
-	version = version,
-	homepage = description.homepage,
+	name = 'litcord',
+	version = 'indev',
+	homepage = 'http://github.com/satom99/litcord',
 }
 
 return require('litcord.client')

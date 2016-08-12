@@ -21,6 +21,7 @@ function rest:request (request)
 		['Authorization'] = self.parent.socket.token,
 	}
 	if request.data then
+		request.data = json.encode(request.data)
 		request.source = ltn12.source.string(request.data)
 		request.headers['Content-Type'] = 'application/json'
 		request.headers['Content-Length'] = #request.data

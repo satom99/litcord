@@ -48,10 +48,9 @@ function Socket:__initHandlers ()
 	self:on(
 		constants.socket.OPcodes.HELLO,
 		function(data)
-			self.helloed = os.clock()
 			self.heartbeat = utils.Timer(
 				function()
-					print('BEAAAAAAT')
+					--print('BEAAAAAAT')
 					self:send(
 						constants.socket.OPcodes.HEARTBEAT,
 						self.sequence

@@ -23,6 +23,7 @@ function Client:__initHandlers ()
 		constants.socket.events.READY,
 		function(data)
 			self.user = structures.User(self)
+			self.user.game = {} --
 			self.user:update(data.user)
 			self.users:add(self.user)
 			for _,guild in ipairs(data.guilds) do
@@ -552,6 +553,52 @@ function Client:login (tmail, password)
 		self.socket.token = response.token
 	end
 	self.socket:connect()
+end
+
+function Client:setStats (config)
+	if config.idle or config.game then
+		self.socket:send(
+			constants.socket.OPcodes.STATUS_UPDATE,
+			{
+				game = self.user.game,
+				idle_since = self.user.idle_since or 'null',
+			}
+		)
+	end
+	if config.username or config.avatar then
+		self.rest:request(
+			{
+				method = 'PATCH',
+				path = self.rest.endPoints.USERS_ME,
+				data = {
+					avatar = config.avatar or self.user.avatar,
+					username = config.username or self.user.username,
+				},
+			}
+		)
+	end
+end
+function Client:setName (name)
+	self:setStats({
+		username = name,
+	})
+end
+function Client:setAvatar (avatar)
+	self:setStats({
+		avatar = avatar,
+	})
+end
+function Client:setIdle (idle)
+	self.user.idle_since = (idle and 1)
+	self:setStats({
+		idle = true,
+	})
+end
+function Client:setGame (game)
+	self.user.game.name = game
+	self:setStats({
+		game = true,
+	})
 end
 
 return Client

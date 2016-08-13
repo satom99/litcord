@@ -23,13 +23,13 @@ end
 function Bitwise:add (value)
 	value = tonumber(value) or constants.permissions[value]
 	self.value = setbit(self.value, value)
-	self.parnet:__updatedBitwise()
+	self.parent:__updatedBitwise()
 end
 
 function Bitwise:remove (value)
 	value = tonumber(value) or constants.permissions[value]
 	self.value = clearbit(self.value, value)
-	self.parnet:__updatedBitwise()
+	self.parent:__updatedBitwise()
 end
 
 return Bitwise

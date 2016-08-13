@@ -36,6 +36,7 @@ build = {
 			['litcord.constants.rest'] = 'litcord/constants/rest.lua',
 			['litcord.constants.socket'] = 'litcord/constants/socket.lua',
 			['litcord.constants.events'] = 'litcord/constants/events.lua',
+			['litcord.constants.permissions'] = 'litcord/constants/permissions.lua',
 			--
 			['litcord.structures.init'] = 'litcord/structures/init.lua',
 			['litcord.structures.base'] = 'litcord/structures/base.lua',

@@ -6,7 +6,7 @@ source = {
 }
 description = {
 	license = 'MIT',
-	summary = 'Yet another unofficial Lua client API for Discord.',
+	summary = 'An unofficial standalone Lua wrapper for Discord.',
 	homepage = 'http://github.com/satom99/litcord',
 	maintainer = 'AdamJames <satom99@github>',
 }
@@ -53,6 +53,6 @@ build = {
 			['litcord.client.rest'] = 'litcord/client/rest.lua',
 			['litcord.client.Socket'] = 'litcord/client/Socket.lua',
 			['litcord.client.Client'] = 'litcord/client/Client.lua',
-		}
-	}
+		},
+	},
 }

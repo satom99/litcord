@@ -460,18 +460,7 @@ function Client:__initHandlers ()
 			if not server then return end
 			self:emit(
 				constants.events.roleDelete,
-				server.roles:get('id', data.role.id)
-			)
-		end
-	)
-	self.socket:on(
-		constants.socket.events.GUILD_ROLE_DELETE,
-		function(data)
-			local server = self.servers:get('id', data.guild_id)
-			if not server then return end
-			self:emit(
-				constants.events.roleDelete,
-				server.roles:get('id', data.role.id)
+				server.roles:get('id', data.role_id)
 			)
 		end
 	)

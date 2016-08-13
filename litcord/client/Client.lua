@@ -308,7 +308,9 @@ function Client:__initHandlers ()
 				self.users:add(user)
 			end
 			user:update(data)
-			server:getBans():add(user) -- error
+			if server.bans then
+				server.bans:add(user)
+			end
 		end
 	)
 	self.socket:on(
@@ -318,7 +320,9 @@ function Client:__initHandlers ()
 			if not server then return end
 			local ban = server.bans:get('id', data.id)
 			if not ban then return end
-			server:getBans():remove(ban) -- error
+			if server.bans then
+				server.bans:remove(ban)
+			end
 		end
 	)
 	---------------------

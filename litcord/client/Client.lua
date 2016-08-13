@@ -301,28 +301,24 @@ function Client:__initHandlers ()
 		constants.socket.events.GUILD_BAN_ADD,
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
-			if not server then return end
+			if not server or not server.bans then return end
 			local user = self.users:get('id', data.id)
 			if not user then
 				user = structures.User(self)
 				self.users:add(user)
 			end
 			user:update(data)
-			if server.bans then
-				server.bans:add(user)
-			end
+			server.bans:add(user)
 		end
 	)
 	self.socket:on(
 		constants.socket.events.GUILD_BAN_REMOVE,
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
-			if not server then return end
+			if not server or not server.bans then return end
 			local ban = server.bans:get('id', data.id)
 			if not ban then return end
-			if server.bans then
-				server.bans:remove(ban)
-			end
+			server.bans:remove(ban)
 		end
 	)
 	---------------------

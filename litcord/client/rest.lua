@@ -7,21 +7,22 @@ function rest:__constructor (parent)
 	self.parent = parent
 end
 
-function rest:request (request)
+function rest:request (config)
 	while self.limited do
 		utils.sleep(250)
 	end
 	--
+	local request = {}
 	local response = {}
-	request.url = self.base..'/'..request.path
-	request.path = nil
+	request.url = self.base..'/'..config.path
 	request.sink = ltn12.sink.table(response)
+	request.method = config.method
 	request.headers = {
 		['User-Agent'] = library.name..' ('..library.homepage..', '..library.version..')',
 		['Authorization'] = self.parent.socket.token,
 	}
-	if request.data then
-		request.data = json.encode(request.data)
+	if config.data then
+		request.data = json.encode(config.data)
 		request.source = ltn12.source.string(request.data)
 		request.headers['Content-Type'] = 'application/json'
 		request.headers['Content-Length'] = #request.data
@@ -39,10 +40,10 @@ function rest:request (request)
 			self.limited = true
 			utils.sleep(retry)
 			self.limited = false
-			return self:request(request)
+			return self:request(config)
 		elseif code == 502 then
 			utils.sleep(250)
-			return self:request(request)
+			return self:request(config)
 		end
 		print('* Unhandled REST error '..code)
 		return

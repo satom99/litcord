@@ -48,7 +48,7 @@ function rest:request (request)
 		return
 	end
 	response = table.concat(response)
-	return json.decode(response)
+	return (code == 204) or json.decode(response)
 end
 
 return rest

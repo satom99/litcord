@@ -5,13 +5,10 @@ local rest = class(constants.rest)
 
 function rest:__constructor (parent)
 	self.parent = parent
+	self.limits = {}
 end
 
 function rest:request (config)
-	while self.limited do
-		utils.sleep(250)
-	end
-	--
 	local request = {}
 	local response = {}
 	request.url = self.base..'/'..config.path
@@ -27,27 +24,38 @@ function rest:request (config)
 		request.headers['Content-Type'] = 'application/json'
 		request.headers['Content-Length'] = #request.data
 	end
+	--
+	if self.limits.global then
+		utils.sleep(self.limits.global)
+		self.limits.global = nil
+	elseif self.limits[request.method] then
+		utils.sleep(self.limits[request.method])
+		self.limits[request.method] = nil
+	end
+	--
 	local _, code, headers = https.request(request)
+	--
+	local date = headers['date'] -- time
+	local reset = headers['x-ratelimit-reset']
+	local global = headers['x-ratelimit-global']
+	local remaining = headers['x-ratelimit-remaining']
+	if tostring(remaining) == '0' then
+		self.limits[request.method] = reset - os.time()
+	elseif global then
+		self.limits.global = reset - os.time()
+	end
+	--
 	if code > 399 then
 		if code == 429 then
-			local retry = 0
-			for k,v in pairs(headers) do
-				if k:lower() == 'retry-after' then
-					retry = v
-					break
-				end
-			end
-			self.limited = true
-			utils.sleep(retry)
-			self.limited = false
 			return self:request(config)
 		elseif code == 502 then
-			utils.sleep(250)
+			utils.sleep(.25)
 			return self:request(config)
 		end
 		print('* Unhandled REST error '..code)
 		return
 	end
+	--
 	response = table.concat(response)
 	return (code == 204) or json.decode(response)
 end

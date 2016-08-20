@@ -541,6 +541,7 @@ function Client:login (tmail, password)
 		end
 		self.socket.token = response.token
 	end
+	self.socket.token = 'Bot '..self.socket.token
 	self.socket:connect()
 end
 

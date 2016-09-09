@@ -89,4 +89,12 @@ function Member:revokeRole (role)
 	})
 end
 
+function Member:hasPermission (bit)
+	for _,role in ipairs(self.roles) do
+		if role.permissions:has(bit) then
+			return true
+		end
+	end
+end
+
 return Member

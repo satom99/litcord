@@ -4,14 +4,14 @@ function Channel:__constructor ()
 	self.history = utils.Cache()
 end
 
-function Channel:sendMessage (content, options)
-	options = options or {}
-	options.content = content
+function Channel:sendMessage (content, config)
+	config = config or {}
+	config.content = content
 	local data = self.parent.parent.rest:request(
 		{
 			method = 'POST',
 			path = 'channels/'..self.id..'/messages',
-			data = options,
+			data = config,
 		}
 	)
 	if not data then return end
@@ -21,15 +21,37 @@ function Channel:sendMessage (content, options)
 	return message
 end
 
-function Channel:sendFile (file, content, options)
-	options = options or {}
+function Channel:sendFile (file, content, config) -- multipart/form-data
+	config = config or {}
 	local handler = io.open(file, 'r')
 	if handler then
 		file = handler:read('*a')
 		handler:close()
 	end
-	options.file = file
-	return self:sendMessage(content, options)
+	config.file = file
+	return self:sendMessage(content, config)
+end
+
+function Channel:getHistory (limit, config)
+	local data = self.parent.parent.rest:request(
+		{
+			method = 'GET',
+			path = 'channels/'..self.id..'/messages',
+			data = utils.merge(
+				{
+					limit = limit,
+				},
+				config
+			),
+		}
+	)
+	if not data then return end
+	for i,v in ipairs(data) do
+		local message = structures.Message(self)
+		message:update(v)
+		data[i] = message
+	end
+	return data
 end
 
 function Channel:delete ()

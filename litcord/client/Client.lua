@@ -91,9 +91,9 @@ end
 function Client:setAvatar (avatar)
 	self:setStats({avatar = avatar})
 end
-function Client:setIdle (idle)
-	self.user.idle_since = (idle and 1)
-	self:setStats({idle = true})
+function Client:setIdle (bool)
+	self.user.idle_since = (bool and 1)
+	self:setStats({idle = bool})
 end
 
 -- Invites

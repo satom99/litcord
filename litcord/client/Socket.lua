@@ -14,7 +14,6 @@ function Socket:__initHandlers ()
 		function(data, sequence, event)
 			event = event:lower()
 			self.sequence = sequence
-			--print(sequence..' => '..event)
 			self:emit(
 				event,
 				data
@@ -50,7 +49,6 @@ function Socket:__initHandlers ()
 		function(data)
 			self.heartbeat = utils.Timer(
 				function()
-					--print('BEAAAAAAT')
 					self:send(
 						constants.socket.OPcodes.HEARTBEAT,
 						self.sequence
@@ -59,7 +57,7 @@ function Socket:__initHandlers ()
 				data.heartbeat_interval / 2
 			)
 			if not (self.session_id and self.sequence) then
-				--print('Identifying.')
+				print('Identifying.')
 				self:send(
 					constants.socket.OPcodes.IDENTIFY,
 					{
@@ -77,7 +75,7 @@ function Socket:__initHandlers ()
 					}
 				)
 			else
-				--print('Resuming.')
+				print('Resuming.')
 				self:send(
 					constants.socket.OPcodes.RESUME,
 					{
@@ -112,7 +110,7 @@ function Socket:connect ()
 		self.gateway = response.url..'/?v=5'
 	end
 	--
-	--print('Connecting.')
+	print('Connecting.')
 	self.socket = WebSocket()
 	local _, failed = self.socket:connect(
 		self.gateway,
@@ -126,7 +124,6 @@ function Socket:connect ()
 		error('Unable to connect. ('..failed..')')
 		return
 	end
-	--print('Connected.')
 	--
 	self.status = constants.socket.status.CONNECTED
 	self:listen()
@@ -147,7 +144,6 @@ function Socket:send (op, data)
 end
 
 function Socket:listen ()
-	--print('Listening.')
 	coroutine.wrap(
 		function()
 			while true do
@@ -162,7 +158,6 @@ function Socket:listen ()
 					self.disconnect_manual = false
 					break
 				else
-					--print(payload)
 					payload = json.decode(payload)
 					self:emit(
 						payload.op,

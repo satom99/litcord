@@ -23,7 +23,6 @@ function Client:__initHandlers ()
 		constants.socket.events.READY,
 		function(data)
 			self.user = structures.User(self)
-			self.user.game = {} --
 			self.user:update(data.user)
 			self.users:add(self.user)
 			for _,guild in ipairs(data.guilds) do
@@ -42,10 +41,7 @@ function Client:__initHandlers ()
 	)
 	-- Users
 	self.socket:on(
-		{
-			constants.socket.events.USER_UPDATE,
-			constants.socket.events.PRESENCE_UPDATE,
-		},
+		constants.socket.events.USER_UPDATE,
 		function(data)
 			local user = self.users:get('id', data.id)
 			if not user then
@@ -247,6 +243,7 @@ function Client:__initHandlers ()
 	)
 	self.socket:on(
 		{
+			constants.socket.events.PRESENCE_UPDATE,
 			constants.socket.events.GUILD_MEMBER_ADD,
 			constants.socket.events.GUILD_MEMBER_UPDATE,
 		},
@@ -337,15 +334,6 @@ function Client:__initHandlers ()
 		function(data)
 			self:emit(
 				constants.events.userUpdate,
-				self.users:get('id', data.id)
-			)
-		end
-	)
-	self.socket:on(
-		constants.socket.events.PRESENCE_UPDATE,
-		function(data)
-			self:emit(
-				constants.events.presenceUpdate,
 				self.users:get('id', data.id)
 			)
 		end
@@ -465,6 +453,17 @@ function Client:__initHandlers ()
 		end
 	)
 	self.socket:on(
+		constants.socket.events.PRESENCE_UPDATE,
+		function(data)
+			local server = self.servers:get('id', data.guild_id)
+			if not server then return end
+			self:emit(
+				constants.events.presenceUpdate,
+				server.members:get('id', data.user.id)
+			)
+		end
+	)
+	self.socket:on(
 		constants.socket.events.GUILD_MEMBER_ADD,
 		function(data)
 			local server = self.servers:get('id', data.guild_id)
@@ -545,49 +544,62 @@ function Client:login (tmail, password)
 	self.socket:connect()
 end
 
-function Client:setStats (config)
-	if config.idle or config.game then
-		self.socket:send(
-			constants.socket.OPcodes.STATUS_UPDATE,
-			{
-				game = self.user.game,
-				idle_since = self.user.idle_since or 'null',
-			}
-		)
-	end
-	if config.username or config.avatar then
-		self.rest:request(
-			{
-				method = 'PATCH',
-				path = self.rest.endPoints.USERS_ME,
-				data = {
-					avatar = config.avatar or self.user.avatar,
-					username = config.username or self.user.username,
-				},
-			}
-		)
-	end
+function Client:setSettings (config)
+	self.rest:request(
+		{
+			method = 'PATCH',
+			path = self.rest.endPoints.USERS_ME,
+			data = {
+				avatar = config.avatar or self.user.avatar,
+				username = config.username or self.user.username,
+			},
+		}
+	)
 end
-function Client:setName (name)
+function Client:setSettings (name)
 	self:setStats({
 		username = name,
 	})
 end
-function Client:setAvatar (avatar)
+function Client:setSettings (avatar)
 	self:setStats({
 		avatar = avatar,
 	})
 end
+
+function Client:setStatus (config)
+	if config.idle == nil then
+		config.idle = self.user.idle and (self.user.idle > 0)
+	end
+	self.user.idle = (config.idle and 1) or 0
+	if type(config.game) == 'table' then
+		self.user.game = utils.merge(
+			self.user.game,
+			config.game
+		)
+	else
+		self.user.game = (
+			config.game and {
+				name = config.game,
+			}
+		) or self.user.game or {}
+	end
+	self.socket:send(
+		constants.socket.OPcodes.STATUS_UPDATE,
+		{
+			game = self.user.game,
+			idle_since = self.user.idle,
+		}
+	)
+end
 function Client:setIdle (idle)
-	self.user.idle_since = (idle and 1)
-	self:setStats({
-		idle = true,
+	self:setStatus({
+		idle = idle,
 	})
 end
 function Client:setGame (game)
-	self.user.game.name = game
-	self:setStats({
-		game = true,
+	self:setStatus({
+		game = game,
 	})
 end
 

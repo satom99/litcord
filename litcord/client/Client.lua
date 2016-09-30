@@ -556,13 +556,13 @@ function Client:setSettings (config)
 		}
 	)
 end
-function Client:setSettings (name)
-	self:setStats({
+function Client:setName (name)
+	self:setSettings({
 		username = name,
 	})
 end
-function Client:setSettings (avatar)
-	self:setStats({
+function Client:setAvatar (avatar)
+	self:setSettings({
 		avatar = avatar,
 	})
 end

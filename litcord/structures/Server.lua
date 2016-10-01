@@ -95,6 +95,16 @@ function Server:createVoiceChannel (name, bitrate)
 	)
 end
 
+function Server:unban (user)
+	user = tonumber(user) or user.id
+	self.parent.rest:request(
+		{
+			method = 'DELETE',
+			path = 'guild/'..self.id..'/bans/'..user,
+		}
+	)
+end
+
 function Server:getBans ()
 	if not self.bans then
 		local bans = self.parent.rest:request(

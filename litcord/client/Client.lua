@@ -527,7 +527,7 @@ function Client:login (tmail, password)
 		local response = self.rest:request(
 			{
 				method = 'POST',
-				path = self.rest.endPoints.LOGIN,
+				path = 'auth/login',
 				data = {
 					email = tmail,
 					password = password,
@@ -548,7 +548,7 @@ function Client:setSettings (config)
 	self.rest:request(
 		{
 			method = 'PATCH',
-			path = self.rest.endPoints.USERS_ME,
+			path = 'users/@me',
 			data = {
 				avatar = config.avatar or self.user.avatar,
 				username = config.username or self.user.username,
@@ -601,6 +601,43 @@ function Client:setGame (game)
 	self:setStatus({
 		game = game,
 	})
+end
+
+function Client:acceptInvite (code)
+	self.rest:request(
+		{
+			method = 'POST',
+			path = 'invites/'..code,
+		}
+	)
+end
+
+function Client:getRegions ()
+	return self.rest:request(
+		{
+			method = 'GET',
+			path = 'voice/regions',
+		}
+	)
+end
+function Client:createGuild (name, region, icon)
+	region = tonumber(region) or region.id
+	local data = self.rest:request(
+		{
+			method = 'POST',
+			path = 'guilds',
+			data = {
+				name = name,
+				icon = icon,
+				region = region,
+			},
+		}
+	)
+	if not data then return end
+	local server = structures.Server(self)
+	self.servers:add(server)
+	server:update(data)
+	return server
 end
 
 return Client

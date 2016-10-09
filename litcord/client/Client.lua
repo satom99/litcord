@@ -115,19 +115,28 @@ function Client:__initHandlers ()
 	)
 	-- Messages
 	self.socket:on(
-		{
-			constants.socket.events.MESSAGE_CREATE,
-			constants.socket.events.MESSAGE_UPDATE,
-		},
+		constants.socket.events.MESSAGE_CREATE,
 		function(data)
 			local channel = self.channels:get('id', data.channel_id)
 			if not channel then return end
 			local message = channel.history:get('id', data.id)
 			if not message then
-				data.author = self.users:get('id', data.author.id)
+				if data.author then -- webhooks
+					data.author = self.users:get('id', data.author.id)
+				end
 				message = structures.Message(channel)
 				channel.history:add(message)
 			end
+			message:update(data)
+		end
+	)
+	self.socket:on(
+		constants.socket.events.MESSAGE_UPDATE,
+		function(data)
+			local channel = self.channels:get('id', data.channel_id)
+			if not channel then return end
+			local message = channel.history:get('id', data.id)
+			if not message then return end
 			message:update(data)
 		end
 	)

@@ -121,8 +121,14 @@ function Client:__initHandlers ()
 			if not channel then return end
 			local message = channel.history:get('id', data.id)
 			if not message then
-				if data.author then -- webhooks
-					data.author = self.users:get('id', data.author.id)
+				if data.author then
+					local author = self.users:get('id', data.author.id)
+					if not author then
+						author = structures.User(self)
+						self.users:add(author)
+					end
+					author:update(data.author)
+					data.author = author
 				end
 				message = structures.Message(channel)
 				channel.history:add(message)
@@ -549,7 +555,9 @@ function Client:login (tmail, password)
 		end
 		self.socket.token = response.token
 	end
-	self.socket.token = 'Bot '..self.socket.token
+	if not self.socket.token:lower():find('mfa.') then
+		self.socket.token = 'Bot '..self.socket.token
+	end
 	self.socket:connect()
 end
 

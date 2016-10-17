@@ -33,16 +33,13 @@ function Channel:sendFile (file, content, config) -- multipart/form-data
 end
 
 function Channel:getHistory (limit, config)
+	config = config or {}
+	config.limit = limit
 	local data = self.parent.parent.rest:request(
 		{
 			method = 'GET',
 			path = 'channels/'..self.id..'/messages',
-			data = utils.merge(
-				{
-					limit = limit,
-				},
-				config
-			),
+			data = config,
 		}
 	)
 	if not data then return end
@@ -54,25 +51,26 @@ function Channel:getHistory (limit, config)
 	return data
 end
 
+function Channel:bulkDelete (messages)
+	for i,v in ipairs(messages) do
+		messages[i] = tonumber(v) or v.id
+	end
+	self.parent.parent.rest:request(
+		{
+			method = 'POST',
+			path = 'channels/'..self.id..'/messages/bulk_delete',
+			data = {
+				messages = messages,
+			},
+		}
+	)
+end
+
 function Channel:delete ()
 	self.parent.parent.rest:request(
 		{
 			method = 'DELETE',
 			path = 'channels/'..self.id,
-		}
-	)
-end
-
-function Channel:bulkDelete (messages)
-	local bulk = {messages = {}}
-	for _, message in pairs(messages) do
-		table.insert(bulk.messages, message.id)
-	end
-	self.parent.parent.parent.rest:request(
-		{
-			method = 'POST',
-			path = 'channels/'..self.id..'/messages/bulk_delete',
-			data = bulk
 		}
 	)
 end

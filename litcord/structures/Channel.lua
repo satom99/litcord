@@ -32,16 +32,21 @@ function Channel:sendFile (file, content, config) -- multipart/form-data
 	return self:sendMessage(content, config)
 end
 
-function Channel:getHistory (limit, config)
+function Channel:getHistory (limit, around, before, after) -- around, before and after not needed
+	extra =  {
+			"around" = around,
+			"before" = before,
+			"after" = after,
+		}
 	local data = self.parent.parent.rest:request(
 		{
 			method = 'GET',
 			path = 'channels/'..self.id..'/messages',
 			data = utils.merge(
 				{
-					limit = limit,
+					"limit" = limit,
 				},
-				config
+				extra or {}
 			),
 		}
 	)

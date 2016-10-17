@@ -63,6 +63,20 @@ function Channel:delete ()
 	)
 end
 
+function Channel:bulkDelete (messages)
+	local bulk = {messages = {}}
+	for _, message in pairs(messages) do
+		table.insert(bulk.messages, message.id)
+	end
+	self.parent.parent.parent.rest:request(
+		{
+			method = 'POST',
+			path = 'channels/'..self.id..'/messages/bulk_delete',
+			data = bulk
+		}
+	)
+end
+
 function Channel:edit (config)
 	self.parent.parent.rest:request(
 		{

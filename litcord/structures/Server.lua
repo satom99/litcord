@@ -68,6 +68,12 @@ function Server:setAFKtimeout (timeout)
 	})
 end
 
+function Server:setVerificationLevel (level) -- from 0 to 3
+	self:edit({
+		verification_level = level,
+	})
+end
+
 function Server:createChannel (config)
 	self.parent.rest:request(
 		{
